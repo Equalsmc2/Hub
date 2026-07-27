@@ -174,12 +174,12 @@
     </div>
 
     <div class="canvas-container">
-        <!-- Expanded wider canvas layout to fit 26 letter plates -->
+        <!-- Expanded wider canvas layout to fit 26 letter plates + Backspace -->
         <canvas id="hubCanvas" width="1150" height="500"></canvas>
     </div>
 
     <div class="controls-hint">
-        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT</strong> to move, <strong>W / SPACE / UP</strong> to jump. Spell the required keyword by jumping on the plates in sequence.
+        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT</strong> to move, <strong>W / SPACE / UP</strong> to jump. Spell the required keyword. Jump on <strong>DEL</strong> to backspace.
     </div>
 
     <!-- Firebase SDK & Multiplayer Logic -->
@@ -282,7 +282,8 @@
             };
 
             const platforms = [
-                { x: 0, y: 460, w: 1150, h: 40 }   // Main floor across expanded screen width
+                { x: 0, y: 460, w: 1150, h: 40 },   // Main floor across expanded screen width
+                { x: 1020, y: 360, w: 80, h: 20 }   // Elevated platform for the DEL plate
             ];
 
             // 26 alphabet plates spread evenly across the floor
@@ -296,6 +297,15 @@
                     h: 15,
                     letter: letter
                 });
+            });
+
+            // Backspace plate situated on the elevated platform
+            plates.push({
+                x: 1042,
+                y: 345,
+                w: 36,
+                h: 15,
+                letter: "DEL"
             });
 
             // Typing Logic State
@@ -430,12 +440,18 @@
                     }
                 });
 
-                // If player lands on a new plate they weren't just standing on, record the letter
+                // If player lands on a new plate they weren't just standing on, record the letter or backspace
                 if (newlySteppedPlate !== -1 && newlySteppedPlate !== currentPlateIndex) {
-                    typedSequence += plates[newlySteppedPlate].letter;
-                    // Keep the tracked string at a reasonable length so memory doesn't blow up
-                    if (typedSequence.length > 15) {
-                        typedSequence = typedSequence.substring(typedSequence.length - 15);
+                    let pressedChar = plates[newlySteppedPlate].letter;
+                    if (pressedChar === "DEL") {
+                        // Backspace logic
+                        typedSequence = typedSequence.slice(0, -1);
+                    } else {
+                        // Append logic
+                        typedSequence += pressedChar;
+                        if (typedSequence.length > 15) {
+                            typedSequence = typedSequence.substring(typedSequence.length - 15);
+                        }
                     }
                 }
                 currentPlateIndex = newlySteppedPlate;
@@ -493,7 +509,7 @@
                     ctx.fillText("LOCKED_DOOR", exitDoor.x + (exitDoor.w / 2), exitDoor.y - 10);
                 }
 
-                // Draw Floor Platforms
+                // Draw Floor & Elevated Platforms
                 ctx.fillStyle = "#000000";
                 platforms.forEach(plat => {
                     ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
@@ -510,7 +526,7 @@
                     }
                 }
 
-                // Draw 26 Alphabet Plates
+                // Draw 26 Alphabet Plates + DEL Plate
                 plates.forEach((plate, idx) => {
                     const isPressed = pressedIndices.has(idx);
                     const drawY = isPressed ? plate.y + 5 : plate.y;
