@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE_HUB // BRANCH_B_SECTOR</title>
+    <title>THE_HUB // BRANCH_B_CIPHER</title>
     <style>
         * {
             box-sizing: border-box;
@@ -19,7 +19,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 30px 50px;
+            padding: 20px 30px;
             overflow: hidden;
             user-select: none;
         }
@@ -29,24 +29,24 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px dashed #000000;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
         }
 
         .system-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
         }
 
         .user-hud {
-            font-size: 16px;
+            font-size: 14px;
             display: flex;
-            gap: 20px;
+            gap: 15px;
             align-items: center;
         }
 
         .color-indicator {
-            width: 15px;
-            height: 15px;
+            width: 12px;
+            height: 12px;
             display: inline-block;
             border: 1px solid #000000;
         }
@@ -57,7 +57,7 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            margin: 20px 0;
+            margin: 10px 0;
         }
 
         canvas {
@@ -67,10 +67,10 @@
         }
 
         .controls-hint {
-            font-size: 14px;
+            font-size: 13px;
             text-align: center;
             background: rgba(0, 0, 0, 0.1);
-            padding: 10px;
+            padding: 8px;
             border: 1px solid rgba(0, 0, 0, 0.3);
         }
 
@@ -157,14 +157,14 @@
             <div style="font-size: 18px; margin-bottom: 20px;">[INITIALIZING BRANCH_B PROTOCOL]</div>
             <div style="font-size: 14px; margin-bottom: 10px; text-align: left;">ENTER AUTHORIZED SEEKER ID:</div>
             <input type="text" id="gateUsername" placeholder="e.g. Mneme_seeker">
-            <button onclick="enterHub()">CONNECT TO SECTOR</button>
+            <button onclick="enterHub()">CONNECT TO CIPHER SECTOR</button>
             <div id="gateError" class="error-text"></div>
         </div>
     </div>
 
     <!-- ROOM MAIN INTERFACE -->
     <div class="header-panel">
-        <div class="system-title">CHAMBER_STATUS: BRANCH_B [SEQUENCE CIPHER - CLOUD SYNC ACTIVE]</div>
+        <div class="system-title">CHAMBER_STATUS: BRANCH_B [ALPHABET CIPHER - CLOUD SYNC ACTIVE]</div>
         <div class="user-hud">
             <span>SEEKER: <strong id="hudUser">---</strong></span>
             <span>TRAUMA SUIT: <strong id="hudSuit">---</strong></span>
@@ -174,11 +174,12 @@
     </div>
 
     <div class="canvas-container">
-        <canvas id="hubCanvas" width="900" height="450"></canvas>
+        <!-- Expanded wider canvas layout to fit 26 letter plates -->
+        <canvas id="hubCanvas" width="1150" height="500"></canvas>
     </div>
 
     <div class="controls-hint">
-        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT</strong> to move, <strong>W / SPACE / UP</strong> to jump. Step on letter plates in the correct sequence. Press <strong>UP</strong> on the opened door to exit.
+        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT</strong> to move, <strong>W / SPACE / UP</strong> to jump. Press <strong>UP</strong> to enter the unlocked exit door.
     </div>
 
     <!-- Firebase SDK & Multiplayer Logic -->
@@ -208,14 +209,14 @@
 
         const seekerColors = {
             "Mneme_seeker": "#ff3366",
-            "Mirror_seeker": "#008080",
-            "Written_seeker": "#800080",
-            "Faded_seeker": "#555555",
+            "Mirror_seeker": "#33ffcc",
+            "Written_seeker": "#ffcc00",
+            "Faded_seeker": "#b8b8b8",
             "Dule_Seeker": "#ff6600",
-            "Old_seeker": "#4b0082",
-            "Strong_seeker": "#006600",
-            "Weaveshaper_seeker": "#000088",
-            "Fabled_seeker": "#cc00cc",
+            "Old_seeker": "#9933ff",
+            "Strong_seeker": "#33cc33",
+            "Weaveshaper_seeker": "#3399ff",
+            "Fabled_seeker": "#ff33ff",
             "Prince_seeker": "#FFFF00"
         };
 
@@ -270,7 +271,7 @@
 
             let player = {
                 x: 50,
-                y: 350,
+                y: 380,
                 width: 24,
                 height: 36,
                 vx: 0,
@@ -281,22 +282,27 @@
             };
 
             const platforms = [
-                { x: 0, y: 410, w: 900, h: 40 }
+                { x: 0, y: 460, w: 1150, h: 40 }   // Main floor across expanded screen width
             ];
 
-            // 5 letter plates spelling I-C-H-O-R spread across the floor
-            const plates = [
-                { x: 120, y: 395, w: 70, h: 15, char: 'I' },
-                { x: 280, y: 395, w: 70, h: 15, char: 'C' },
-                { x: 440, y: 395, w: 70, h: 15, char: 'H' },
-                { x: 600, y: 395, w: 70, h: 15, char: 'O' },
-                { x: 760, y: 395, w: 70, h: 15, char: 'R' }
-            ];
+            // 26 alphabet plates spread evenly across the floor
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+            const plates = [];
+            alphabet.forEach((letter, idx) => {
+                plates.push({
+                    x: 30 + idx * 42,
+                    y: 445,
+                    w: 36,
+                    h: 15,
+                    letter: letter
+                });
+            });
 
-            const exitDoor = { x: 415, y: 220, w: 70, h: 100, url: "branch_b_success.html" };
-
+            const targetWord = "ICHOR";
             let currentSequence = [];
-            const targetWord = ['I', 'C', 'H', 'O', 'R'];
+
+            // Exit door that reveals when the correct word sequence is entered
+            const exitDoor = { x: 525, y: 260, w: 100, h: 120, url: "next_sector.html" };
 
             const gravity = 0.5;
             const keys = {};
@@ -327,7 +333,7 @@
                 return (
                     ent.x < plate.x + plate.w &&
                     ent.x + ent.width > plate.x &&
-                    Math.abs((ent.y + ent.height) - plate.y) < 10
+                    Math.abs((ent.y + ent.height) - plate.y) < 8
                 );
             }
 
@@ -374,34 +380,28 @@
                 });
             });
 
-            function updateSequenceState() {
-                // Collect all active indices stepped on by any player recently
-                let activeIndices = new Set();
+            function getActiveSequence() {
+                // Collect all letters currently pressed down by any player in order of traversal or index
+                let pressedIndices = new Set();
                 
                 plates.forEach((plate, idx) => {
-                    if (isStandingOnPlate(player, plate)) {
-                        activeIndices.add(idx);
-                    }
+                    if (isStandingOnPlate(player, plate)) pressedIndices.add(idx);
                 });
 
                 for (const [pName, pData] of Object.entries(peers)) {
                     if (pData.onPlate !== undefined && pData.onPlate >= 0) {
-                        activeIndices.add(pData.onPlate);
+                        pressedIndices.add(pData.onPlate);
                     }
                 }
 
-                // Build sequence array based on order of plates hit or tracked
-                // For simplicity in a multi-user puzzle, let's track global activation order or match sequence state
-                // Let's maintain an ordered list of unique plates stepped on
-                return Array.from(activeIndices);
+                // Sort indices to form sequence based on left-to-right order or chronological entry
+                let sortedIndices = Array.from(pressedIndices).sort((a, b) => a - b);
+                return sortedIndices.map(idx => plates[idx].letter).join("");
             }
 
             function isDoorUnlocked() {
-                // Check if sequence matches [0, 1, 2, 3, 4] representing I-C-H-O-R
-                const seq = updateSequenceState();
-                if (seq.length !== 5) return false;
-                const spelled = seq.map(idx => plates[idx].char);
-                return spelled.join('') === targetWord.join('');
+                const seq = getActiveSequence();
+                return seq.includes(targetWord);
             }
 
             function update() {
@@ -457,25 +457,26 @@
 
                 // Draw Exit Door
                 if (unlocked) {
-                    ctx.fillStyle = "#000000";
+                    ctx.fillStyle = "#00ffcc";
                     ctx.fillRect(exitDoor.x, exitDoor.y, exitDoor.w, exitDoor.h);
-                    ctx.strokeStyle = "#FFFFFF";
+                    ctx.strokeStyle = "#000000";
+                    ctx.lineWidth = 2;
                     ctx.strokeRect(exitDoor.x, exitDoor.y, exitDoor.w, exitDoor.h);
 
-                    ctx.fillStyle = "#FFFFFF";
-                    ctx.font = "10px 'Courier New'";
+                    ctx.fillStyle = "#000000";
+                    ctx.font = "12px 'Courier New'";
                     ctx.textAlign = "center";
-                    ctx.fillText("EXIT", exitDoor.x + (exitDoor.w / 2), exitDoor.y + 50);
+                    ctx.fillText("CIPHER_OPEN", exitDoor.x + (exitDoor.w / 2), exitDoor.y - 10);
                 } else {
                     ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
                     ctx.fillRect(exitDoor.x, exitDoor.y, exitDoor.w, exitDoor.h);
                     ctx.strokeStyle = "rgba(0, 0, 0, 0.4)";
                     ctx.strokeRect(exitDoor.x, exitDoor.y, exitDoor.w, exitDoor.h);
 
-                    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-                    ctx.font = "9px 'Courier New'";
+                    ctx.fillStyle = "#000000";
+                    ctx.font = "11px 'Courier New'";
                     ctx.textAlign = "center";
-                    ctx.fillText("LOCKED", exitDoor.x + (exitDoor.w / 2), exitDoor.y + 50);
+                    ctx.fillText("LOCKED_DOOR", exitDoor.x + (exitDoor.w / 2), exitDoor.y - 10);
                 }
 
                 // Draw Floor Platforms
@@ -484,25 +485,30 @@
                     ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
                 });
 
-                // Draw Letter Plates
+                // Identify currently active pressed plates by local player or peers
+                let pressedIndices = new Set();
                 plates.forEach((plate, idx) => {
-                    let isPressed = isStandingOnPlate(player, plate);
-                    for (const [pName, pData] of Object.entries(peers)) {
-                        if (pData.onPlate === idx) isPressed = true;
+                    if (isStandingOnPlate(player, plate)) pressedIndices.add(idx);
+                });
+                for (const [pName, pData] of Object.entries(peers)) {
+                    if (pData.onPlate !== undefined && pData.onPlate >= 0) {
+                        pressedIndices.add(pData.onPlate);
                     }
+                }
 
-                    const drawY = isPressed ? plate.y + 6 : plate.y;
-                    const drawH = isPressed ? plate.h - 6 : plate.h;
+                // Draw 26 Alphabet Plates
+                plates.forEach((plate, idx) => {
+                    const isPressed = pressedIndices.has(idx);
+                    const drawY = isPressed ? plate.y + 5 : plate.y;
+                    const drawH = isPressed ? plate.h - 5 : plate.h;
 
-                    ctx.fillStyle = isPressed ? "#FFFFFF" : "#594200";
+                    ctx.fillStyle = isPressed ? "#00ffcc" : "#332200";
                     ctx.fillRect(plate.x, drawY, plate.w, drawH);
-                    ctx.strokeStyle = "#000000";
-                    ctx.strokeRect(plate.x, drawY, plate.w, drawH);
 
-                    ctx.fillStyle = isPressed ? "#000000" : "#FFFFFF";
-                    ctx.font = "12px 'Courier New'";
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.font = "10px 'Courier New'";
                     ctx.textAlign = "center";
-                    ctx.fillText(plate.char, plate.x + (plate.w / 2), plate.y - 6);
+                    ctx.fillText(plate.letter, plate.x + (plate.w / 2), plate.y - 6);
                 });
 
                 // Draw Peers
