@@ -178,7 +178,7 @@
     </div>
 
     <div class="controls-hint">
-        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT</strong> to move, <strong>W / SPACE / UP</strong> to jump. Step on letter plates in the correct sequence to unlock the exit door. Press <strong>UP</strong> to enter when opened.
+        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT</strong> to move, <strong>W / SPACE / UP</strong> to jump. Step on letter plates in the correct sequence. Press <strong>UP</strong> on the opened door to exit.
     </div>
 
     <!-- Firebase SDK & Multiplayer Logic -->
@@ -208,14 +208,14 @@
 
         const seekerColors = {
             "Mneme_seeker": "#ff3366",
-            "Mirror_seeker": "#33ffcc",
-            "Written_seeker": "#ffcc00",
-            "Faded_seeker": "#b8b8b8",
+            "Mirror_seeker": "#008080",
+            "Written_seeker": "#800080",
+            "Faded_seeker": "#555555",
             "Dule_Seeker": "#ff6600",
-            "Old_seeker": "#9933ff",
-            "Strong_seeker": "#33cc33",
-            "Weaveshaper_seeker": "#3399ff",
-            "Fabled_seeker": "#ff33ff",
+            "Old_seeker": "#4b0082",
+            "Strong_seeker": "#006600",
+            "Weaveshaper_seeker": "#000088",
+            "Fabled_seeker": "#cc00cc",
             "Prince_seeker": "#FFFF00"
         };
 
@@ -269,7 +269,7 @@
             const ctx = canvas.getContext('2d');
 
             let player = {
-                x: 100,
+                x: 50,
                 y: 350,
                 width: 24,
                 height: 36,
@@ -284,20 +284,19 @@
                 { x: 0, y: 410, w: 900, h: 40 }
             ];
 
-            // 5 letter plates spelling "ICHOR"
+            // 5 letter plates spelling I-C-H-O-R spread across the floor
             const plates = [
-                { x: 150, y: 395, w: 60, h: 15, char: "I" },
-                { x: 280, y: 395, w: 60, h: 15, char: "C" },
-                { x: 410, y: 395, w: 60, h: 15, char: "H" },
-                { x: 540, y: 395, w: 60, h: 15, char: "O" },
-                { x: 670, y: 395, w: 60, h: 15, char: "R" }
+                { x: 120, y: 395, w: 70, h: 15, char: 'I' },
+                { x: 280, y: 395, w: 70, h: 15, char: 'C' },
+                { x: 440, y: 395, w: 70, h: 15, char: 'H' },
+                { x: 600, y: 395, w: 70, h: 15, char: 'O' },
+                { x: 760, y: 395, w: 70, h: 15, char: 'R' }
             ];
 
             const exitDoor = { x: 415, y: 220, w: 70, h: 100, url: "branch_b_success.html" };
 
-            // Global sequence tracker stored in memory/session state for the puzzle
             let currentSequence = [];
-            const targetSequence = ["I", "C", "H", "O", "R"];
+            const targetWord = ['I', 'C', 'H', 'O', 'R'];
 
             const gravity = 0.5;
             const keys = {};
@@ -337,10 +336,10 @@
                 const now = Date.now();
                 if (force || now - lastSync > 100) {
                     lastSync = now;
-                    let localPlateChar = "";
-                    plates.forEach((plate) => {
+                    let localPlateIndex = -1;
+                    plates.forEach((plate, idx) => {
                         if (isStandingOnPlate(player, plate)) {
-                            localPlateChar = plate.char;
+                            localPlateIndex = idx;
                         }
                     });
 
@@ -351,7 +350,7 @@
                             y: player.y,
                             color: playerColor,
                             suit: activeSuit,
-                            currentPlate: localPlateChar,
+                            onPlate: localPlateIndex,
                             lastUpdated: now
                         }, { merge: true });
                     } catch (e) {
@@ -375,35 +374,34 @@
                 });
             });
 
-            // Handle stepping sequence logic: tracks order of plates activated
-            let lastSteppedPlate = null;
-            function updateSequence() {
-                let activeChar = "";
-                plates.forEach(plate => {
+            function updateSequenceState() {
+                // Collect all active indices stepped on by any player recently
+                let activeIndices = new Set();
+                
+                plates.forEach((plate, idx) => {
                     if (isStandingOnPlate(player, plate)) {
-                        activeChar = plate.char;
+                        activeIndices.add(idx);
                     }
                 });
 
-                if (activeChar && activeChar !== lastSteppedPlate) {
-                    lastSteppedPlate = activeChar;
-                    currentSequence.push(activeChar);
-                    
-                    // Check if sequence matches prefix or length
-                    if (currentSequence.length > targetSequence.length) {
-                        currentSequence.shift(); // keep sliding window of last 5 letters
+                for (const [pName, pData] of Object.entries(peers)) {
+                    if (pData.onPlate !== undefined && pData.onPlate >= 0) {
+                        activeIndices.add(pData.onPlate);
                     }
-                } else if (!activeChar) {
-                    lastSteppedPlate = null;
                 }
+
+                // Build sequence array based on order of plates hit or tracked
+                // For simplicity in a multi-user puzzle, let's track global activation order or match sequence state
+                // Let's maintain an ordered list of unique plates stepped on
+                return Array.from(activeIndices);
             }
 
             function isDoorUnlocked() {
-                if (currentSequence.length < targetSequence.length) return false;
-                for (let i = 0; i < targetSequence.length; i++) {
-                    if (currentSequence[i] !== targetSequence[i]) return false;
-                }
-                return true;
+                // Check if sequence matches [0, 1, 2, 3, 4] representing I-C-H-O-R
+                const seq = updateSequenceState();
+                if (seq.length !== 5) return false;
+                const spelled = seq.map(idx => plates[idx].char);
+                return spelled.join('') === targetWord.join('');
             }
 
             function update() {
@@ -448,7 +446,6 @@
                     player.grounded = true;
                 }
 
-                updateSequence();
                 syncPositionToCloud();
             }
 
@@ -461,24 +458,24 @@
                 // Draw Exit Door
                 if (unlocked) {
                     ctx.fillStyle = "#000000";
-                    ctx.fillRect(finalDoor.x, finalDoor.y, finalDoor.w, finalDoor.h);
+                    ctx.fillRect(exitDoor.x, exitDoor.y, exitDoor.w, exitDoor.h);
                     ctx.strokeStyle = "#FFFFFF";
-                    ctx.strokeRect(finalDoor.x, finalDoor.y, finalDoor.w, finalDoor.h);
+                    ctx.strokeRect(exitDoor.x, exitDoor.y, exitDoor.w, exitDoor.h);
 
                     ctx.fillStyle = "#FFFFFF";
                     ctx.font = "10px 'Courier New'";
                     ctx.textAlign = "center";
-                    ctx.fillText("EXIT OPEN", finalDoor.x + (finalDoor.w / 2), finalDoor.y + 50);
+                    ctx.fillText("EXIT", exitDoor.x + (exitDoor.w / 2), exitDoor.y + 50);
                 } else {
                     ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
-                    ctx.fillRect(finalDoor.x, finalDoor.y, finalDoor.w, finalDoor.h);
+                    ctx.fillRect(exitDoor.x, exitDoor.y, exitDoor.w, exitDoor.h);
                     ctx.strokeStyle = "rgba(0, 0, 0, 0.4)";
-                    ctx.strokeRect(finalDoor.x, finalDoor.y, finalDoor.w, finalDoor.h);
+                    ctx.strokeRect(exitDoor.x, exitDoor.y, exitDoor.w, exitDoor.h);
 
-                    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
                     ctx.font = "9px 'Courier New'";
                     ctx.textAlign = "center";
-                    ctx.fillText("LOCKED", finalDoor.x + (finalDoor.w / 2), finalDoor.y + 50);
+                    ctx.fillText("LOCKED", exitDoor.x + (exitDoor.w / 2), exitDoor.y + 50);
                 }
 
                 // Draw Floor Platforms
@@ -488,18 +485,24 @@
                 });
 
                 // Draw Letter Plates
-                plates.forEach((plate) => {
+                plates.forEach((plate, idx) => {
                     let isPressed = isStandingOnPlate(player, plate);
-                    let drawY = isPressed ? plate.y + 6 : plate.y;
-                    let drawH = isPressed ? plate.h - 6 : plate.h;
+                    for (const [pName, pData] of Object.entries(peers)) {
+                        if (pData.onPlate === idx) isPressed = true;
+                    }
+
+                    const drawY = isPressed ? plate.y + 6 : plate.y;
+                    const drawH = isPressed ? plate.h - 6 : plate.h;
 
                     ctx.fillStyle = isPressed ? "#FFFFFF" : "#594200";
                     ctx.fillRect(plate.x, drawY, plate.w, drawH);
+                    ctx.strokeStyle = "#000000";
+                    ctx.strokeRect(plate.x, drawY, plate.w, drawH);
 
                     ctx.fillStyle = isPressed ? "#000000" : "#FFFFFF";
                     ctx.font = "12px 'Courier New'";
                     ctx.textAlign = "center";
-                    ctx.fillText(plate.char, plate.x + (plate.w / 2), plate.y - 5);
+                    ctx.fillText(plate.char, plate.x + (plate.w / 2), plate.y - 6);
                 });
 
                 // Draw Peers
