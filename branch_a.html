@@ -174,12 +174,11 @@
     </div>
 
     <div class="canvas-container">
-        <!-- Wider canvas for a level layout -->
         <canvas id="hubCanvas" width="900" height="450"></canvas>
     </div>
 
     <div class="controls-hint">
-        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT</strong> to move, <strong>W / SPACE / UP</strong> to jump. Reach the energy emission pit at the far right.
+        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT</strong> to move, <strong>W / SPACE / UP</strong> to jump. Complete the course and take a leap of faith into the unknown.
     </div>
 
     <!-- Firebase SDK & Multiplayer Logic -->
@@ -203,10 +202,12 @@
         const validUsers = [
             "Mneme_seeker", "Mirror_seeker", "Written_seeker", 
             "Faded_seeker", "Dule_Seeker", "Old_seeker", 
-            "Strong_seeker", "Weaveshaper_seeker", "Fabled_seeker"
+            "Strong_seeker", "Weaveshaper_seeker", "Fabled_seeker",
+            "Prince_seeker"
         ];
 
         const seekerColors = {
+            "Prince_seeker": "#FFFF00",
             "Mneme_seeker": "#ff3366",
             "Mirror_seeker": "#008080",
             "Written_seeker": "#800080",
@@ -279,30 +280,16 @@
                 grounded: false
             };
 
-            // Level platforms forming an obstacle course layout across 900px width
+            // Level layout leading to continuous ground and then the hidden pit drop
             const platforms = [
-                { x: 0, y: 410, w: 250, h: 40 },   // Start floor
-                { x: 300, y: 330, w: 120, h: 20 },  // Step 1
-                { x: 470, y: 250, w: 120, h: 20 },  // Step 2
-                { x: 640, y: 180, w: 100, h: 20 },  // Step 3
-                { x: 780, y: 410, w: 120, h: 40 }   // End floor near the pit
+                { x: 0, y: 410, w: 900, h: 40 },   // Continuous solid ground across the entire floor
+                { x: 250, y: 320, w: 120, h: 20 },  // Platform 1
+                { x: 430, y: 240, w: 120, h: 20 },  // Platform 2
+                { x: 610, y: 170, w: 120, h: 20 }   // Platform 3
             ];
 
-            // The Pit at the end acting as a door to Pit.html
-            const pit = { x: 720, y: 400, w: 60, h: 50, url: "Pit.html" };
-
-            // Particle system arrays for the emission effect out of the pit
-            let particles = [];
-            for (let i = 0; i < 30; i++) {
-                particles.push({
-                    x: pit.x + Math.random() * pit.w,
-                    y: pit.y + Math.random() * pit.h,
-                    vy: -1 - Math.random() * 2,
-                    vx: (Math.random() - 0.5) * 1,
-                    size: 2 + Math.random() * 3,
-                    alpha: Math.random()
-                });
-            }
+            // Invisible Pit positioned along the ground near the far right end
+            const pit = { x: 780, y: 410, w: 60, h: 40, url: "Pit.html" };
 
             const gravity = 0.5;
             const keys = {};
@@ -376,46 +363,50 @@
                 player.y += player.vy;
                 player.grounded = false;
 
+                // Check collisions with platforms, treating the pit zone as open air
                 platforms.forEach(plat => {
-                    if (
-                        player.x < plat.x + plat.w &&
-                        player.x + player.width > plat.x &&
-                        player.y + player.height > plat.y &&
-                        player.y + player.height - player.vy <= plat.y + 5
-                    ) {
-                        player.y = plat.y - player.height;
-                        player.vy = 0;
-                        player.grounded = true;
+                    // If the platform is the main floor, split it to create the invisible pit gap
+                    if (plat.y === 410) {
+                        // Left side of ground before pit, or right side after pit
+                        if (player.x + player.width > plat.x && player.x < pit.x || player.x > pit.x + pit.w && player.x < plat.x + plat.w) {
+                            if (
+                                player.y + player.height > plat.y &&
+                                player.y + player.height - player.vy <= plat.y + 5
+                            ) {
+                                player.y = plat.y - player.height;
+                                player.vy = 0;
+                                player.grounded = true;
+                            }
+                        }
+                    } else {
+                        // Normal elevated platforms
+                        if (
+                            player.x < plat.x + plat.w &&
+                            player.x + player.width > plat.x &&
+                            player.y + player.height > plat.y &&
+                            player.y + player.height - player.vy <= plat.y + 5
+                        ) {
+                            player.y = plat.y - player.height;
+                            player.vy = 0;
+                            player.grounded = true;
+                        }
                     }
                 });
 
-                // Check collision with the emission pit portal
+                // Check collision with the invisible pit trapdoor zone
                 if (
-                    player.x < pit.x + pit.w &&
-                    player.x + player.width > pit.x &&
+                    player.x + (player.width / 2) > pit.x &&
+                    player.x + (player.width / 2) < pit.x + pit.w &&
                     player.y + player.height >= pit.y
                 ) {
                     window.location.href = pit.url;
                 }
 
-                if (player.y + player.height > canvas.height) {
+                if (player.y + player.height > canvas.height && !(player.x + (player.width / 2) > pit.x && player.x + (player.width / 2) < pit.x + pit.w)) {
                     player.y = canvas.height - player.height;
                     player.vy = 0;
                     player.grounded = true;
                 }
-
-                // Update particles
-                particles.forEach(p => {
-                    p.y += p.vy;
-                    p.x += p.vx;
-                    p.alpha -= 0.02;
-                    if (p.alpha <= 0 || p.y < pit.y - 100) {
-                        p.x = pit.x + Math.random() * pit.w;
-                        p.y = pit.y;
-                        p.alpha = 1;
-                        p.vy = -1 - Math.random() * 2;
-                    }
-                });
 
                 syncPositionToCloud();
             }
@@ -424,27 +415,17 @@
                 ctx.fillStyle = "#b58600";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                // Draw Pit (Door)
-                ctx.fillStyle = "#332200";
-                ctx.fillRect(pit.x, pit.y, pit.w, pit.h);
-                ctx.strokeStyle = "#000000";
-                ctx.strokeRect(pit.x, pit.y, pit.w, pit.h);
-
-                // Draw Particles emitting from the pit
-                particles.forEach(p => {
-                    ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
-                    ctx.fillRect(p.x, p.y, p.size, p.size);
-                });
-
-                ctx.fillStyle = "#000000";
-                ctx.font = "10px 'Courier New'";
-                ctx.textAlign = "center";
-                ctx.fillText("VOID_PIT", pit.x + (pit.w / 2), pit.y - 8);
-
-                // Draw Platforms
+                // Draw Platforms & Continuous Ground (with an invisible gap over the pit)
                 ctx.fillStyle = "#000000";
                 platforms.forEach(plat => {
-                    ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                    if (plat.y === 410) {
+                        // Draw floor up to the pit
+                        ctx.fillRect(plat.x, plat.y, pit.x - plat.x, plat.h);
+                        // Draw floor after the pit
+                        ctx.fillRect(pit.x + pit.w, plat.y, (plat.x + plat.w) - (pit.x + pit.w), plat.h);
+                    } else {
+                        ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                    }
                 });
 
                 // Draw Peers
