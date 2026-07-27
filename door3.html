@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE_HUB // DOOR_3_GATEWAY</title>
+    <title>THE_HUB // DOOR_3_RED_SECTOR</title>
     <style>
         * {
             box-sizing: border-box;
@@ -19,7 +19,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 40px 60px;
+            padding: 30px 50px;
             overflow: hidden;
             user-select: none;
         }
@@ -51,49 +51,27 @@
             border: 1px solid #FF5555;
         }
 
-        .main-content {
+        .canvas-container {
             flex-grow: 1;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+            position: relative;
+            margin: 20px 0;
         }
 
-        .doors-container {
-            display: flex;
-            gap: 40px;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            max-width: 900px;
+        canvas {
+            background-color: #330000;
+            border: 4px solid #FF5555;
+            box-shadow: 0 0 20px rgba(255,0,0,0.3);
         }
 
-        .door-card {
-            background: rgba(255, 0, 0, 0.1);
-            border: 3px dashed #FF5555;
-            padding: 40px 30px;
+        .controls-hint {
+            font-size: 14px;
             text-align: center;
-            flex: 1;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .door-card:hover {
-            background: rgba(255, 0, 0, 0.25);
-            border-color: #FFFFFF;
-            color: #FFFFFF;
-            transform: scale(1.03);
-        }
-
-        .door-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .door-desc {
-            font-size: 13px;
-            opacity: 0.8;
+            background: rgba(255, 0, 0, 0.1);
+            padding: 10px;
+            border: 1px solid rgba(255, 85, 85, 0.3);
         }
 
         .back-link {
@@ -201,7 +179,7 @@
 
     <!-- ROOM MAIN INTERFACE -->
     <div class="header-panel">
-        <div class="system-title">CHAMBER_STATUS: DOOR_3 [TRIPLE SECTOR JUNCTION]</div>
+        <div class="system-title">CHAMBER_STATUS: DOOR_3 [RED SECTOR PLATFORM JUNCTION]</div>
         <div class="user-hud">
             <span>SEEKER: <strong id="hudUser">---</strong></span>
             <span>TRAUMA SUIT: <strong id="hudSuit">---</strong></span>
@@ -210,31 +188,18 @@
         </div>
     </div>
 
-    <div class="main-content">
-        <div class="doors-container">
-            <div class="door-card" onclick="selectSubDoor('sub_alpha.html')">
-                <div class="door-title">SECTOR_OMEGA</div>
-                <div class="door-desc">Proceed down experimental corridor pathway alpha.</div>
-            </div>
-            <div class="door-card" onclick="selectSubDoor('sub_beta.html')">
-                <div class="door-title">SECTOR_VOID</div>
-                <div class="door-desc">Access deep-sublevel subterranean chambers.</div>
-            </div>
-            <div class="door-card" onclick="selectSubDoor('sub_gamma.html')">
-                <div class="door-title">SECTOR_NEXUS</div>
-                <div class="door-desc">Interface with central archival mainframes.</div>
-            </div>
-        </div>
+    <div class="canvas-container">
+        <canvas id="hubCanvas" width="900" height="450"></canvas>
     </div>
 
-    <div style="text-align: center; font-size: 13px; opacity: 0.7;">
-        SELECT AN AUTHORIZED SUB-SECTOR JUNCTION TO CONTINUE
+    <div class="controls-hint">
+        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT</strong> to move, <strong>W / SPACE / UP</strong> to jump. Navigate the platforms to access the 3 sub-corridor doors. Press <strong>UP</strong> when touching a door.
     </div>
 
-    <!-- Firebase SDK & Logic -->
+    <!-- Firebase SDK & Multiplayer Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBlgsx3uuat9oi2vwntXhInUcAe8N-veLY",
@@ -316,6 +281,7 @@
 
             if (passVal.toLowerCase() === "what is the color of electric sheep?") {
                 document.getElementById('passwordGate').style.display = 'none';
+                startPlatformerEngine();
             } else {
                 passError.textContent = "ACCESS DENIED: Invalid security response.";
             }
@@ -325,8 +291,195 @@
             window.location.href = "index.html";
         }
 
-        window.selectSubDoor = function(targetUrl) {
-            window.location.href = targetUrl;
+        function startPlatformerEngine() {
+            const canvas = document.getElementById('hubCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let player = {
+                x: 50,
+                y: 350,
+                width: 24,
+                height: 36,
+                vx: 0,
+                vy: 0,
+                speed: 4,
+                jumpForce: -10,
+                grounded: false
+            };
+
+            const platforms = [
+                { x: 0, y: 410, w: 900, h: 40 },   // Main floor
+                { x: 150, y: 320, w: 140, h: 20 },  // Left platform
+                { x: 380, y: 240, w: 140, h: 20 },  // Center platform
+                { x: 610, y: 160, w: 140, h: 20 }   // Right platform
+            ];
+
+            // 3 doors positioned on platforms or upper levels
+            const subDoors = [
+                { x: 185, y: 245, w: 70, h: 75, url: "sub_alpha.html", name: "ALPHA" },
+                { x: 415, y: 165, w: 70, h: 75, url: "sub_beta.html", name: "BETA" },
+                { x: 645, y: 85, w: 70, h: 75, url: "sub_gamma.html", name: "GAMMA" }
+            ];
+
+            const gravity = 0.5;
+            const keys = {};
+
+            window.addEventListener('keydown', (e) => {
+                if (["ArrowLeft", "ArrowRight", "ArrowUp", "Space", "KeyA", "KeyD", "KeyW"].includes(e.code)) {
+                    e.preventDefault();
+                }
+                keys[e.code] = true;
+
+                if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') {
+                    subDoors.forEach(door => {
+                        if (
+                            player.x < door.x + door.w &&
+                            player.x + player.width > door.x &&
+                            player.y < door.y + door.h &&
+                            player.y + player.height > door.y
+                        ) {
+                            window.location.href = door.url;
+                        }
+                    });
+                }
+            });
+
+            window.addEventListener('keyup', (e) => {
+                keys[e.code] = false;
+            });
+
+            let lastSync = 0;
+            async function syncPositionToCloud(force = false) {
+                const now = Date.now();
+                if (force || now - lastSync > 100) {
+                    lastSync = now;
+                    try {
+                        await setDoc(doc(db, "door3_players", activeUser), {
+                            user: activeUser,
+                            x: player.x,
+                            y: player.y,
+                            color: playerColor,
+                            suit: activeSuit,
+                            lastUpdated: now
+                        }, { merge: true });
+                    } catch (e) {
+                        console.error("Sync error:", e);
+                    }
+                }
+            }
+
+            let peers = {};
+            onSnapshot(collection(db, "door3_players"), (snapshot) => {
+                const now = Date.now();
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    if (data.user !== activeUser && docSnap.id !== activeUser) {
+                        if (now - data.lastUpdated < 4000) {
+                            peers[docSnap.id] = data;
+                        } else {
+                            delete peers[docSnap.id];
+                        }
+                    }
+                });
+            });
+
+            function update() {
+                if (keys['ArrowLeft'] || keys['KeyA']) {
+                    player.vx = -player.speed;
+                } else if (keys['ArrowRight'] || keys['KeyD']) {
+                    player.vx = player.speed;
+                } else {
+                    player.vx *= 0.8;
+                }
+
+                player.vy += gravity;
+
+                if ((keys['ArrowUp'] || keys['Space'] || keys['KeyW']) && player.grounded) {
+                    player.vy = player.jumpForce;
+                    player.grounded = false;
+                }
+
+                player.x += player.vx;
+                if (player.x < 0) player.x = 0;
+                if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+                player.y += player.vy;
+                player.grounded = false;
+
+                platforms.forEach(plat => {
+                    if (
+                        player.x < plat.x + plat.w &&
+                        player.x + player.width > plat.x &&
+                        player.y + player.height > plat.y &&
+                        player.y + player.height - player.vy <= plat.y + 5
+                    ) {
+                        player.y = plat.y - player.height;
+                        player.vy = 0;
+                        player.grounded = true;
+                    }
+                });
+
+                if (player.y + player.height > canvas.height) {
+                    player.y = canvas.height - player.height;
+                    player.vy = 0;
+                    player.grounded = true;
+                }
+
+                syncPositionToCloud();
+            }
+
+            function draw() {
+                ctx.fillStyle = "#330000";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw 3 Sub-Doors
+                subDoors.forEach(door => {
+                    ctx.fillStyle = "rgba(255, 85, 85, 0.2)";
+                    ctx.fillRect(door.x, door.y, door.w, door.h);
+                    ctx.strokeStyle = "#FF5555";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(door.x, door.y, door.w, door.h);
+
+                    ctx.fillStyle = "#FF5555";
+                    ctx.font = "11px 'Courier New'";
+                    ctx.textAlign = "center";
+                    ctx.fillText(door.name, door.x + (door.w / 2), door.y - 8);
+                });
+
+                // Draw Platforms
+                ctx.fillStyle = "#FF5555";
+                platforms.forEach(plat => {
+                    ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                });
+
+                // Draw Peers
+                for (const [peerName, pData] of Object.entries(peers)) {
+                    ctx.fillStyle = pData.color || "#FF5555";
+                    ctx.fillRect(pData.x, pData.y, 24, 36);
+
+                    ctx.fillStyle = "#FF5555";
+                    ctx.font = "10px 'Courier New'";
+                    ctx.textAlign = "center";
+                    ctx.fillText(`${peerName}`, pData.x + 12, pData.y - 6);
+                }
+
+                // Draw Local Player
+                ctx.fillStyle = playerColor;
+                ctx.fillRect(player.x, player.y, player.width, player.height);
+
+                ctx.fillStyle = "#FF5555";
+                ctx.font = "11px 'Courier New'";
+                ctx.textAlign = "center";
+                ctx.fillText(`${activeUser} (YOU)`, player.x + (player.width / 2), player.y - 8);
+            }
+
+            function loop() {
+                update();
+                draw();
+                requestAnimationFrame(loop);
+            }
+
+            loop();
         }
     </script>
 </body>
