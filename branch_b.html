@@ -179,7 +179,7 @@
     </div>
 
     <div class="controls-hint">
-        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT</strong> to move, <strong>W / SPACE / UP</strong> to jump. Press <strong>UP</strong> to enter the unlocked exit door.
+        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT</strong> to move, <strong>W / SPACE / UP</strong> to jump. Spell the required keyword by jumping on the plates in sequence.
     </div>
 
     <!-- Firebase SDK & Multiplayer Logic -->
@@ -298,8 +298,10 @@
                 });
             });
 
+            // Typing Logic State
             const targetWord = "ICHOR";
-            let currentSequence = [];
+            let typedSequence = "";
+            let currentPlateIndex = -1;
 
             // Exit door that reveals when the correct word sequence is entered
             const exitDoor = { x: 525, y: 260, w: 100, h: 120, url: "next_sector.html" };
@@ -380,28 +382,8 @@
                 });
             });
 
-            function getActiveSequence() {
-                // Collect all letters currently pressed down by any player in order of traversal or index
-                let pressedIndices = new Set();
-                
-                plates.forEach((plate, idx) => {
-                    if (isStandingOnPlate(player, plate)) pressedIndices.add(idx);
-                });
-
-                for (const [pName, pData] of Object.entries(peers)) {
-                    if (pData.onPlate !== undefined && pData.onPlate >= 0) {
-                        pressedIndices.add(pData.onPlate);
-                    }
-                }
-
-                // Sort indices to form sequence based on left-to-right order or chronological entry
-                let sortedIndices = Array.from(pressedIndices).sort((a, b) => a - b);
-                return sortedIndices.map(idx => plates[idx].letter).join("");
-            }
-
             function isDoorUnlocked() {
-                const seq = getActiveSequence();
-                return seq.includes(targetWord);
+                return typedSequence.includes(targetWord);
             }
 
             function update() {
@@ -440,6 +422,24 @@
                     }
                 });
 
+                // Logic for tracking typed letters (jumping from one plate to another)
+                let newlySteppedPlate = -1;
+                plates.forEach((plate, idx) => {
+                    if (isStandingOnPlate(player, plate)) {
+                        newlySteppedPlate = idx;
+                    }
+                });
+
+                // If player lands on a new plate they weren't just standing on, record the letter
+                if (newlySteppedPlate !== -1 && newlySteppedPlate !== currentPlateIndex) {
+                    typedSequence += plates[newlySteppedPlate].letter;
+                    // Keep the tracked string at a reasonable length so memory doesn't blow up
+                    if (typedSequence.length > 15) {
+                        typedSequence = typedSequence.substring(typedSequence.length - 15);
+                    }
+                }
+                currentPlateIndex = newlySteppedPlate;
+
                 if (player.y + player.height > canvas.height) {
                     player.y = canvas.height - player.height;
                     player.vy = 0;
@@ -454,6 +454,20 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 const unlocked = isDoorUnlocked();
+
+                // Draw Background Terminal (Shows current typed sequence)
+                ctx.fillStyle = "#000000";
+                ctx.fillRect(425, 50, 300, 60);
+                ctx.strokeStyle = "#FFFFFF";
+                ctx.strokeRect(425, 50, 300, 60);
+                
+                ctx.fillStyle = "#00ffcc";
+                ctx.font = "16px 'Courier New'";
+                ctx.textAlign = "center";
+                ctx.fillText("INPUT SEQUENCE:", 575, 75);
+                ctx.fillStyle = unlocked ? "#00ffcc" : "#FFFFFF";
+                ctx.font = "20px 'Courier New'";
+                ctx.fillText(typedSequence.length > 0 ? typedSequence : "[AWAITING INPUT]", 575, 95);
 
                 // Draw Exit Door
                 if (unlocked) {
