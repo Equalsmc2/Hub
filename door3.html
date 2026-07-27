@@ -193,7 +193,7 @@
         <div class="portal-box">
             <div style="font-size: 24px; margin-bottom: 15px; color: #FF5555;">:(</div>
             <div style="font-size: 16px; margin-bottom: 20px; color: #FF5555;">SECURITY CHECK: Input Pass Word</div>
-            <input type="text" id="gatePassword" placeholder="What is the color of electric sheep?">
+            <input type="text" id="gatePassword" placeholder="Input pass word...">
             <button onclick="verifyPassword()">UNLOCK CHAMBER</button>
             <div id="passError" class="error-text"></div>
         </div>
@@ -314,7 +314,7 @@
             const passVal = document.getElementById('gatePassword').value.trim();
             const passError = document.getElementById('passError');
 
-            if (passVal.toLowerCase() === "electric blue" || passVal.toLowerCase() === "blue") {
+            if (passVal.toLowerCase() === "What is the color of electric sheep?" || passVal.toLowerCase() === "blue") {
                 document.getElementById('passwordGate').style.display = 'none';
             } else {
                 passError.textContent = "ACCESS DENIED: Invalid security response.";
