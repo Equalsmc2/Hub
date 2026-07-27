@@ -178,7 +178,7 @@
     </div>
 
     <div class="controls-hint">
-        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT ARROWS</strong> to move, <strong>W / SPACE / UP ARROW</strong> to jump.
+        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT</strong> to move, <strong>W / SPACE / UP</strong> to jump. Walk into a door and press <strong>UP</strong> to enter.
     </div>
 
     <!-- Firebase SDK & Multiplayer Logic -->
@@ -233,7 +233,6 @@
 
             activeUser = matchedUser;
             
-            // Fetch assigned suit from Firestore allocations
             try {
                 const docSnap = await getDoc(doc(db, "trauma_suits", "allocations"));
                 if (docSnap.exists()) {
@@ -280,12 +279,17 @@
             };
 
             const platforms = [
-                { x: 0, y: 410, w: 800, h: 40 },
-                { x: 150, y: 310, w: 200, h: 20 },
-                { x: 450, y: 240, w: 220, h: 20 },
-                { x: 200, y: 160, w: 180, h: 20 },
-                { x: 50, y: 210, w: 70, h: 20 },
-                { x: 680, y: 140, w: 90, h: 20 }
+                { x: 0, y: 410, w: 800, h: 40 },   // Floor
+                { x: 100, y: 310, w: 180, h: 20 },  // Left platform
+                { x: 310, y: 230, w: 180, h: 20 },  // Middle platform
+                { x: 520, y: 310, w: 180, h: 20 }   // Right platform
+            ];
+
+            // Three structural doors placed on top of the platforms
+            const doors = [
+                { x: 170, y: 230, w: 40, h: 80, label: "DOOR 1", url: "door1.html" },
+                { x: 380, y: 150, w: 40, h: 80, label: "DOOR 2", url: "door2.html" },
+                { x: 590, y: 230, w: 40, h: 80, label: "DOOR 3", url: "door3.html" }
             ];
 
             const gravity = 0.5;
@@ -296,13 +300,27 @@
                     e.preventDefault();
                 }
                 keys[e.code] = true;
+
+                // Check door interaction when pressing Up / W inside a door boundary
+                if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') {
+                    doors.forEach(door => {
+                        if (
+                            player.x < door.x + door.w &&
+                            player.x + player.width > door.x &&
+                            player.y < door.y + door.h &&
+                            player.y + player.height > door.y
+                        ) {
+                            // Redirect to respective door page
+                            window.location.href = door.url;
+                        }
+                    });
+                }
             });
 
             window.addEventListener('keyup', (e) => {
                 keys[e.code] = false;
             });
 
-            // Sync position to Firestore database every 100ms
             let lastSync = 0;
             async function syncPositionToCloud(force = false) {
                 const now = Date.now();
@@ -322,14 +340,12 @@
                 }
             }
 
-            // Listen to all players in real-time from Firestore collection
             let peers = {};
             onSnapshot(collection(db, "hub_players"), (snapshot) => {
                 const now = Date.now();
                 snapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     if (data.user !== activeUser && docSnap.id !== activeUser) {
-                        // Keep peer if active within last 4 seconds
                         if (now - data.lastUpdated < 4000) {
                             peers[docSnap.id] = data;
                         } else {
@@ -351,8 +367,23 @@
                 player.vy += gravity;
 
                 if ((keys['ArrowUp'] || keys['Space'] || keys['KeyW']) && player.grounded) {
-                    player.vy = player.jumpForce;
-                    player.grounded = false;
+                    // Prevent jumping if interacting with a door directly underneath us
+                    let enteringDoor = false;
+                    doors.forEach(door => {
+                        if (
+                            player.x < door.x + door.w &&
+                            player.x + player.width > door.x &&
+                            player.y + player.height >= door.y &&
+                            player.y <= door.y + door.h
+                        ) {
+                            enteringDoor = true;
+                        }
+                    });
+
+                    if (!enteringDoor) {
+                        player.vy = player.jumpForce;
+                        player.grounded = false;
+                    }
                 }
 
                 player.x += player.vx;
@@ -388,12 +419,28 @@
                 ctx.fillStyle = "#00458a";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+                // Draw Doors
+                doors.forEach(door => {
+                    ctx.fillStyle = "#002b5c";
+                    ctx.fillRect(door.x, door.y, door.w, door.h);
+                    ctx.strokeStyle = "#FFFFFF";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(door.x, door.y, door.w, door.h);
+
+                    // Door Label Text
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.font = "10px 'Courier New'";
+                    ctx.textAlign = "center";
+                    ctx.fillText(door.label, door.x + (door.w / 2), door.y - 6);
+                });
+
+                // Draw Platforms
                 ctx.fillStyle = "#FFFFFF";
                 platforms.forEach(plat => {
                     ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
                 });
 
-                // Draw other online players
+                // Draw Peers
                 for (const [peerName, pData] of Object.entries(peers)) {
                     ctx.fillStyle = pData.color || "#FFFFFF";
                     ctx.fillRect(pData.x, pData.y, 24, 36);
@@ -404,7 +451,7 @@
                     ctx.fillText(`${peerName} [${pData.suit}]`, pData.x + 12, pData.y - 6);
                 }
 
-                // Draw local player
+                // Draw Local Player
                 ctx.fillStyle = playerColor;
                 ctx.fillRect(player.x, player.y, player.width, player.height);
 
