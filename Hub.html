@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE_HUB // SYSTEM_ALLOCATED_ZONE</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #0078D7;
+            color: #FFFFFF;
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30px 50px;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .header-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px dashed #FFFFFF;
+            padding-bottom: 15px;
+        }
+
+        .system-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .user-hud {
+            font-size: 16px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .color-indicator {
+            width: 15px;
+            height: 15px;
+            display: inline-block;
+            border: 1px solid #FFFFFF;
+        }
+
+        /* Canvas Platformer Arena Styling */
+        .canvas-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin: 20px 0;
+        }
+
+        canvas {
+            background-color: #00458a;
+            border: 4px solid #FFFFFF;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .controls-hint {
+            font-size: 14px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .back-link {
+            color: #FFFFFF;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: #d1e7ff;
+        }
+
+        /* Login Gate Overlay for the Hub */
+        #loginGate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #0078D7;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .portal-box {
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px dashed #FFFFFF;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        input[type="text"] {
+            background: transparent;
+            border: 2px solid #FFFFFF;
+            color: #FFFFFF;
+            padding: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            width: 100%;
+            outline: none;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        button {
+            background: #FFFFFF;
+            color: #0078D7;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #e0e0e0;
+        }
+
+        .error-text {
+            color: #ffcccc;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN GATE OVERLAY (Ensures character continuity from Page 1) -->
+    <div id="loginGate">
+        <div class="portal-box">
+            <div style="font-size: 24px; margin-bottom: 15px;">:(</div>
+            <div style="font-size: 18px; margin-bottom: 20px;">[INITIALIZING THE_HUB ACCESS PROTOCOL]</div>
+            <div style="font-size: 14px; margin-bottom: 10px; text-align: left;">ENTER AUTHORIZED SEEKER ID:</div>
+            <input type="text" id="gateUsername" placeholder="e.g. Mneme_seeker">
+            <button onclick="enterHub()">CONNECT TO THE HUB</button>
+            <div id="gateError" class="error-text"></div>
+        </div>
+    </div>
+
+    <!-- HUB MAIN INTERFACE -->
+    <div class="header-panel">
+        <div class="system-title">KERNEL_STATUS: THE_HUB [ONLINE]</div>
+        <div class="user-hud">
+            <span>SEEKER: <strong id="hudUser">---</strong></span>
+            <span>TRAUMA SUIT: <strong id="hudSuit">---</strong></span>
+            <span>COLOR CODE: <span class="color-indicator" id="hudColorBox"></span></span>
+            <span class="back-link" onclick="logoutHub()">[DISCONNECT]</span>
+        </div>
+    </div>
+
+    <div class="canvas-container">
+        <!-- 800x450 BSOD themed canvas arena -->
+        <canvas id="hubCanvas" width="800" height="450"></canvas>
+    </div>
+
+    <div class="controls-hint">
+        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT ARROWS</strong> to move, <strong>W / SPACE / UP ARROW</strong> to jump. Stay within allocation bounds.
+    </div>
+
+    <script>
+        const validUsers = [
+            "Mneme_seeker",
+            "Mirror_seeker",
+            "Written_seeker",
+            "Faded_seeker",
+            "Dule_Seeker",
+            "Old_seeker",
+            "Strong_seeker",
+            "Weaveshaper_seeker",
+            "Fabled_seeker"
+        ];
+
+        // Unique color mapped to each seeker identity for visual differentiation
+        const seekerColors = {
+            "Mneme_seeker": "#ff3366",        // Bright Pink-Red
+            "Mirror_seeker": "#33ffcc",       // Cyan-Teal
+            "Written_seeker": "#ffcc00",      // Gold Yellow
+            "Faded_seeker": "#b8b8b8",        // Light Gray
+            "Dule_Seeker": "#ff6600",         // Orange
+            "Old_seeker": "#9933ff",          // Purple
+            "Strong_seeker": "#33cc33",       // Lime Green
+            "Weaveshaper_seeker": "#3399ff",  // Electric Blue
+            "Fabled_seeker": "#ff33ff"        // Magenta
+        };
+
+        let activeUser = "";
+        let activeSuit = "Unallocated";
+        let playerColor = "#FFFFFF";
+
+        // Check if user already logged in via page 1's localStorage session or prompt them
+        window.addEventListener('DOMContentLoaded', () => {
+            const storedUser = localStorage.getItem('hub_current_user');
+            if (storedUser && validUsers.find(u => u.toLowerCase() === storedUser.toLowerCase())) {
+                activeUser = storedUser;
+                initializeHubSession();
+            }
+        });
+
+        function enterHub() {
+            const inputVal = document.getElementById('gateUsername').value.trim();
+            const errorDiv = document.getElementById('gateError');
+            const matchedUser = validUsers.find(u => u.toLowerCase() === inputVal.toLowerCase());
+
+            if (!matchedUser) {
+                errorDiv.textContent = "ERROR 0x80070002: Unknown Seeker ID profile.";
+                return;
+            }
+
+            activeUser = matchedUser;
+            localStorage.setItem('hub_current_user', activeUser);
+            initializeHubSession();
+        }
+
+        function initializeHubSession() {
+            document.getElementById('loginGate').style.display = 'none';
+
+            // Fetch assigned trauma suit from page 1's shared storage mapping if available
+            const lockedSuits = JSON.parse(localStorage.getItem('bsod_locked_trauma_suits') || '{}');
+            for (const [suit, user] of Object.entries(lockedSuits)) {
+                if (user.toLowerCase() === activeUser.toLowerCase()) {
+                    activeSuit = suit;
+                    break;
+                }
+            }
+
+            playerColor = seekerColors[activeUser] || "#FFFFFF";
+
+            document.getElementById('hudUser').textContent = activeUser;
+            document.getElementById('hudSuit').textContent = activeSuit;
+            document.getElementById('hudColorBox').style.backgroundColor = playerColor;
+
+            startPlatformerEngine();
+        }
+
+        function logoutHub() {
+            localStorage.removeItem('hub_current_user');
+            location.reload();
+        }
+
+        // --- MULTIPLAYER PLATFORMER ENGINE (Using BroadcastChannel & LocalStorage Heartbeats) ---
+        function startPlatformerEngine() {
+            const canvas = document.getElementById('hubCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Physics & Player State
+            let player = {
+                x: 100,
+                y: 300,
+                width: 24,
+                height: 36,
+                vx: 0,
+                vy: 0,
+                speed: 4,
+                jumpForce: -10,
+                grounded: false
+            };
+
+            // Level Platforms Layout (BSOD aesthetic structured environment)
+            const platforms = [
+                { x: 0, y: 410, w: 800, h: 40 },   // Floor
+                { x: 150, y: 310, w: 200, h: 20 },  // Low platform left
+                { x: 450, y: 240, w: 220, h: 20 },  // Mid platform right
+                { x: 200, y: 160, w: 180, h: 20 },  // High platform center
+                { x: 50, y: 210, w: 70, h: 20 },    // Extra step
+                { x: 680, y: 140, w: 90, h: 20 }    // Upper right ledge
+            ];
+
+            const gravity = 0.5;
+            const keys = {};
+
+            // Input Event Listeners
+            window.addEventListener('keydown', (e) => {
+                if (["ArrowLeft", "ArrowRight", "ArrowUp", "Space", "KeyA", "KeyD", "KeyW"].includes(e.code)) {
+                    e.preventDefault(); // Prevent page scrolling
+                }
+                keys[e.code] = true;
+            });
+
+            window.addEventListener('keyup', (e) => {
+                keys[e.code] = false;
+            });
+
+            // Cross-tab / Multi-user Realtime Sync via BroadcastChannel API
+            const channel = new BroadcastChannel('hub_multiplayer_channel');
+            let peers = {}; // Stores other active seeker states
+
+            // Broadcast own position every 50ms
+            setInterval(() => {
+                channel.postMessage({
+                    user: activeUser,
+                    x: player.x,
+                    y: player.y,
+                    color: playerColor,
+                    suit: activeSuit,
+                    timestamp: Date.now()
+                });
+            }, 50);
+
+            channel.onmessage = (event) => {
+                const data = event.data;
+                if (data.user && data.user !== activeUser) {
+                    peers[data.user] = {
+                        x: data.x,
+                        y: data.y,
+                        color: data.color,
+                        suit: data.suit,
+                        lastSeen: Date.now()
+                    };
+                }
+            };
+
+            // Main Game Loop
+            function update() {
+                // Horizontal movement
+                if (keys['ArrowLeft'] || keys['KeyA']) {
+                    player.vx = -player.speed;
+                } else if (keys['ArrowRight'] || keys['KeyD']) {
+                    player.vx = player.speed;
+                } else {
+                    player.vx *= 0.8; // Friction deceleration
+                }
+
+                // Vertical physics
+                player.vy += gravity;
+
+                // Jump mechanics
+                if ((keys['ArrowUp'] || keys['Space'] || keys['KeyW']) && player.grounded) {
+                    player.vy = player.jumpForce;
+                    player.grounded = false;
+                }
+
+                // Apply horizontal motion and check platform collision
+                player.x += player.vx;
+                // Boundary clamping inside canvas width
+                if (player.x < 0) player.x = 0;
+                if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+                // Apply vertical motion & collisions
+                player.y += player.vy;
+                player.grounded = false;
+
+                platforms.forEach(plat => {
+                    // AABB Collision Detection
+                    if (
+                        player.x < plat.x + plat.w &&
+                        player.x + player.width > plat.x &&
+                        player.y + player.height > plat.y &&
+                        player.y + player.height - player.vy <= plat.y + 5 // Landing criteria from above
+                    ) {
+                        player.y = plat.y - player.height;
+                        player.vy = 0;
+                        player.grounded = true;
+                    }
+                });
+
+                // Floor boundary safeguard
+                if (player.y + player.height > canvas.height) {
+                    player.y = canvas.height - player.height;
+                    player.vy = 0;
+                    player.grounded = true;
+                }
+
+                // Clean up inactive/stale peers (not seen for > 3 seconds)
+                const now = Date.now();
+                for (const peerUser in peers) {
+                    if (now - peers[peerUser].lastSeen > 3000) {
+                        delete peers[peerUser];
+                    }
+                }
+            }
+
+            function draw() {
+                // Clear canvas with deep BSOD blue background tone
+                ctx.fillStyle = "#00458a";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw platforms
+                ctx.fillStyle = "#FFFFFF";
+                platforms.forEach(plat => {
+                    ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                });
+
+                // Draw all connected peer players
+                for (const [peerName, pData] of Object.entries(peers)) {
+                    ctx.fillStyle = pData.color;
+                    ctx.fillRect(pData.x, pData.y, 24, 36);
+
+                    // Draw peer username label above their sprite
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.font = "10px 'Courier New'";
+                    ctx.textAlign = "center";
+                    ctx.fillText(`${peerName} [${pData.suit}]`, pData.x + 12, pData.y - 6);
+                }
+
+                // Draw local player
+                ctx.fillStyle = playerColor;
+                ctx.fillRect(player.x, player.y, player.width, player.height);
+
+                // Draw local player name tag
+                ctx.fillStyle = "#FFFFFF";
+                ctx.font = "11px 'Courier New'";
+                ctx.textAlign = "center";
+                ctx.fillText(`${activeUser} (YOU)`, player.x + (player.width / 2), player.y - 8);
+            }
+
+            function loop() {
+                update();
+                draw();
+                requestAnimationFrame(loop);
+            }
+
+            loop();
+        }
+    </script>
+</body>
+</html>
