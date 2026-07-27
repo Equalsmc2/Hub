@@ -284,7 +284,7 @@
                 { x: 0, y: 410, w: 900, h: 40 }
             ];
 
-            // 10 plates specifically mapped to the 10 authorized users
+            // 10 plates mapped specifically to individual seeker names
             const plates = [
                 { x: 40, y: 395, w: 70, h: 15, targetUser: "mneme_seeker", label: "Mneme" },
                 { x: 125, y: 395, w: 70, h: 15, targetUser: "mirror_seeker", label: "Mirror" },
@@ -349,8 +349,10 @@
                 if (force || now - lastSync > 100) {
                     lastSync = now;
                     let localPlateIndex = -1;
+                    
                     plates.forEach((plate, idx) => {
-                        if (isStandingOnPlate(player, plate)) {
+                        // Only register state if the local user is standing on their own assigned plate
+                        if (activeUser.toLowerCase() === plate.targetUser && isStandingOnPlate(player, plate)) {
                             localPlateIndex = idx;
                         }
                     });
@@ -389,13 +391,16 @@
             function checkOccupants() {
                 let occupants = {};
                 plates.forEach((plate, idx) => {
-                    if (isStandingOnPlate(player, plate)) {
+                    if (activeUser.toLowerCase() === plate.targetUser && isStandingOnPlate(player, plate)) {
                         occupants[idx] = activeUser.toLowerCase();
                     }
                 });
                 for (const [pName, pData] of Object.entries(peers)) {
                     if (pData.onPlate !== undefined && pData.onPlate >= 0) {
-                        occupants[pData.onPlate] = pName.toLowerCase();
+                        const assignedPlate = plates[pData.onPlate];
+                        if (assignedPlate && pData.user.toLowerCase() === assignedPlate.targetUser) {
+                            occupants[pData.onPlate] = pData.user.toLowerCase();
+                        }
                     }
                 }
                 return occupants;
@@ -409,12 +414,15 @@
                 let hasWritten = false;
                 let hasMirror = false;
 
-                for (const user of Object.values(occ)) {
-                    if (user === "old_seeker") hasOld = true;
-                    if (user === "fabled_seeker") hasFabled = true;
-                    if (user === "strong_seeker") hasStrong = true;
-                    if (user === "written_seeker") hasWritten = true;
-                    if (user === "mirror_seeker") hasMirror = true;
+                for (const [idx, user] of Object.entries(occ)) {
+                    const plateTarget = plates[idx].targetUser;
+                    if (user === plateTarget) {
+                        if (user === "old_seeker") hasOld = true;
+                        if (user === "fabled_seeker") hasFabled = true;
+                        if (user === "strong_seeker") hasStrong = true;
+                        if (user === "written_seeker") hasWritten = true;
+                        if (user === "mirror_seeker") hasMirror = true;
+                    }
                 }
 
                 return hasOld && hasFabled && hasStrong && hasWritten && hasMirror;
@@ -425,9 +433,12 @@
                 let fadedPresent = false;
                 let oldPresent = false;
 
-                for (const user of Object.values(occ)) {
-                    if (user === "faded_seeker") fadedPresent = true;
-                    if (user === "old_seeker") oldPresent = true;
+                for (const [idx, user] of Object.entries(occ)) {
+                    const plateTarget = plates[idx].targetUser;
+                    if (user === plateTarget) {
+                        if (user === "faded_seeker") fadedPresent = true;
+                        if (user === "old_seeker") oldPresent = true;
+                    }
                 }
                 return fadedPresent && oldPresent;
             }
@@ -507,7 +518,7 @@
                     ctx.fillText("SEALED", finalDoor.x + (finalDoor.w / 2), finalDoor.y + 50);
                 }
 
-                // Draw Secret Door (Only shows when faded_seeker and old_seeker are on plates)
+                // Draw Secret Door
                 if (secretUnlocked) {
                     ctx.fillStyle = "#00ffcc";
                     ctx.fillRect(secretDoor.x, secretDoor.y, secretDoor.w, secretDoor.h);
@@ -526,11 +537,17 @@
                     ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
                 });
 
-                // Draw 10 Pressure Plates with User Labels
+                // Draw 10 Pressure Plates with User Labels (Stays down when pressed correctly by the right user)
                 const occupants = checkOccupants();
                 plates.forEach((plate, idx) => {
-                    ctx.fillStyle = occupants[idx] ? "#00ffcc" : "#444444";
-                    ctx.fillRect(plate.x, plate.y, plate.w, plate.h);
+                    const isPressedDown = occupants[idx] !== undefined;
+                    
+                    // Plate sinks down slightly when depressed
+                    const drawY = isPressedDown ? plate.y + 6 : plate.y;
+                    const drawH = isPressedDown ? plate.h - 6 : plate.h;
+
+                    ctx.fillStyle = isPressedDown ? "#00ffcc" : "#444444";
+                    ctx.fillRect(plate.x, drawY, plate.w, drawH);
 
                     ctx.fillStyle = "#FFFFFF";
                     ctx.font = "8px 'Courier New'";
