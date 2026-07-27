@@ -1,9 +1,12 @@
 <!DOCTYPE html>
+
+<!-- ROT6 -->
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE_HUB // DOOR_2_AUTHENTICATION</title>
+    <title>THE_HUB // DOOR_2_AUTHENTICATION_YELLOW</title>
     <style>
         * {
             box-sizing: border-box;
@@ -12,8 +15,8 @@
         }
 
         body {
-            background-color: #0078D7;
-            color: #FFFFFF;
+            background-color: #D7A000;
+            color: #000000;
             font-family: 'Courier New', Courier, monospace;
             height: 100vh;
             display: flex;
@@ -28,7 +31,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px dashed #FFFFFF;
+            border-bottom: 2px dashed #000000;
             padding-bottom: 15px;
         }
 
@@ -48,7 +51,7 @@
             width: 15px;
             height: 15px;
             display: inline-block;
-            border: 1px solid #FFFFFF;
+            border: 1px solid #000000;
         }
 
         .canvas-container {
@@ -61,28 +64,28 @@
         }
 
         canvas {
-            background-color: #00458a;
-            border: 4px solid #FFFFFF;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            background-color: #b58600;
+            border: 4px solid #000000;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
         }
 
         .controls-hint {
             font-size: 14px;
             text-align: center;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.1);
             padding: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(0, 0, 0, 0.3);
         }
 
         .back-link {
-            color: #FFFFFF;
+            color: #000000;
             text-decoration: underline;
             cursor: pointer;
             font-size: 14px;
         }
 
         .back-link:hover {
-            color: #d1e7ff;
+            color: #333333;
         }
 
         #authGate {
@@ -91,7 +94,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: #0078D7;
+            background: #D7A000;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -100,9 +103,24 @@
             padding: 20px;
         }
 
+        #loginGate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #D7A000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1100;
+            padding: 20px;
+        }
+
         .portal-box {
-            background: rgba(0, 0, 0, 0.2);
-            border: 2px dashed #FFFFFF;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px dashed #000000;
             padding: 30px;
             max-width: 500px;
             width: 100%;
@@ -111,8 +129,8 @@
 
         input[type="text"], input[type="password"] {
             background: transparent;
-            border: 2px solid #FFFFFF;
-            color: #FFFFFF;
+            border: 2px solid #000000;
+            color: #000000;
             padding: 10px;
             font-family: 'Courier New', Courier, monospace;
             font-size: 16px;
@@ -122,12 +140,12 @@
         }
 
         input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(0, 0, 0, 0.6);
         }
 
         button {
-            background: #FFFFFF;
-            color: #0078D7;
+            background: #000000;
+            color: #D7A000;
             border: none;
             padding: 10px 20px;
             font-family: 'Courier New', Courier, monospace;
@@ -138,11 +156,11 @@
         }
 
         button:hover {
-            background: #e0e0e0;
+            background: #333333;
         }
 
         .error-text {
-            color: #ffcccc;
+            color: #550000;
             margin-top: 10px;
             font-size: 14px;
         }
@@ -150,23 +168,37 @@
 </head>
 <body>
 
-    <!-- AUTHENTICATION GATE OVERLAY -->
-    <div id="authGate">
+    <!-- LOGIN GATE OVERLAY -->
+    <div id="loginGate">
+        <div class="portal-box">
+            <div style="font-size: 24px; margin-bottom: 15px;">:(</div>
+            <div style="font-size: 18px; margin-bottom: 20px;">[INITIALIZING DOOR_2 ACCESS PROTOCOL]</div>
+            <div style="font-size: 14px; margin-bottom: 10px; text-align: left;">ENTER AUTHORIZED SEEKER ID:</div>
+            <input type="text" id="gateUsername" placeholder="e.g. Mneme_seeker">
+            <button onclick="enterHub()">CONNECT TO CHAMBER</button>
+            <div id="gateError" class="error-text"></div>
+        </div>
+    </div>
+
+    <!-- AUTHENTICATION GATE OVERLAY (Shown after login) -->
+    <div id="authGate" style="display: none;">
         <div class="portal-box">
             <div style="font-size: 24px; margin-bottom: 15px;">:(</div>
             <div style="font-size: 18px; margin-bottom: 20px;">[SECURITY EXCEPTION: DOOR 2 LOCKED]</div>
             <div style="font-size: 14px; margin-bottom: 10px; text-align: left;">ENTER KERNEL PASSWORD:</div>
             <input type="password" id="gatePassword" placeholder="Enter password...">
             <button onclick="verifyPassword()">AUTHENTICATE</button>
-            <div id="gateError" class="error-text"></div>
+            <div id="authError" class="error-text"></div>
         </div>
     </div>
 
     <!-- ROOM MAIN INTERFACE -->
     <div class="header-panel">
-        <div class="system-title">CHAMBER_STATUS: DOOR_2 [MULTI-BRANCH ZONE]</div>
+        <div class="system-title">CHAMBER_STATUS: DOOR_2 [MULTI-BRANCH ZONE - CLOUD SYNC ACTIVE]</div>
         <div class="user-hud">
-            <span>SECURITY LEVEL: <strong style="color: #00ffcc;">VERIFIED</strong></span>
+            <span>SEEKER: <strong id="hudUser">---</strong></span>
+            <span>TRAUMA SUIT: <strong id="hudSuit">---</strong></span>
+            <span>COLOR CODE: <span class="color-indicator" id="hudColorBox"></span></span>
             <span class="back-link" onclick="returnToHub()">[RETURN TO HUB]</span>
         </div>
     </div>
@@ -179,10 +211,86 @@
         CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT</strong> to move, <strong>W / SPACE / UP</strong> to jump. Navigate to either Branch Door and press <strong>UP</strong> to enter.
     </div>
 
-    <script>
+    <!-- Firebase SDK & Multiplayer Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBlgsx3uuat9oi2vwntXhInUcAe8N-veLY",
+            authDomain: "enter-f1c88.firebaseapp.com",
+            projectId: "enter-f1c88",
+            storageBucket: "enter-f1c88.appspot.com",
+            messagingSenderId: "794692963928",
+            appId: "1:794692963928:web:83fed114aed9389bf3042d",
+            measurementId: "G-PFGVSW5598"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const validUsers = [
+            "Mneme_seeker", "Mirror_seeker", "Written_seeker", 
+            "Faded_seeker", "Dule_Seeker", "Old_seeker", 
+            "Strong_seeker", "Weaveshaper_seeker", "Fabled_seeker"
+        ];
+
+        const seekerColors = {
+            "Mneme_seeker": "#ff3366",
+            "Mirror_seeker": "#008080",
+            "Written_seeker": "#800080",
+            "Faded_seeker": "#555555",
+            "Dule_Seeker": "#ff6600",
+            "Old_seeker": "#4b0082",
+            "Strong_seeker": "#006600",
+            "Weaveshaper_seeker": "#000088",
+            "Fabled_seeker": "#cc00cc"
+        };
+
+        let activeUser = "";
+        let activeSuit = "Unallocated";
+        let playerColor = "#000000";
+
+        window.enterHub = async function() {
+            const inputVal = document.getElementById('gateUsername').value.trim();
+            const errorDiv = document.getElementById('gateError');
+            const matchedUser = validUsers.find(u => u.toLowerCase() === inputVal.toLowerCase());
+
+            if (!matchedUser) {
+                errorDiv.textContent = "ERROR 0x80070002: Unknown Seeker ID profile.";
+                return;
+            }
+
+            activeUser = matchedUser;
+            
+            try {
+                const docSnap = await getDoc(doc(db, "trauma_suits", "allocations"));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    for (const [suit, user] of Object.entries(data)) {
+                        if (user.toLowerCase() === activeUser.toLowerCase()) {
+                            activeSuit = suit;
+                            break;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Could not fetch suit data", e);
+            }
+
+            playerColor = seekerColors[activeUser] || "#000000";
+
+            document.getElementById('hudUser').textContent = activeUser;
+            document.getElementById('hudSuit').textContent = activeSuit;
+            document.getElementById('hudColorBox').style.backgroundColor = playerColor;
+
+            document.getElementById('loginGate').style.display = 'none';
+            document.getElementById('authGate').style.display = 'flex';
+        }
+
         window.verifyPassword = function() {
             const passVal = document.getElementById('gatePassword').value;
-            const errorDiv = document.getElementById('gateError');
+            const errorDiv = document.getElementById('authError');
 
             if (passVal === "HelloWorld") {
                 document.getElementById('authGate').style.display = 'none';
@@ -218,7 +326,6 @@
                 { x: 500, y: 300, w: 200, h: 20 }   // Right Ledge
             ];
 
-            // Two branch doors positioned on the left and right ledges
             const doors = [
                 { x: 175, y: 200, w: 50, h: 100, label: "BRANCH_A", url: "branch_a.html" },
                 { x: 575, y: 200, w: 50, h: 100, label: "BRANCH_B", url: "branch_b.html" }
@@ -233,7 +340,6 @@
                 }
                 keys[e.code] = true;
 
-                // Check interaction with branch doors
                 if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') {
                     doors.forEach(door => {
                         if (
@@ -250,6 +356,41 @@
 
             window.addEventListener('keyup', (e) => {
                 keys[e.code] = false;
+            });
+
+            let lastSync = 0;
+            async function syncPositionToCloud(force = false) {
+                const now = Date.now();
+                if (force || now - lastSync > 100) {
+                    lastSync = now;
+                    try {
+                        await setDoc(doc(db, "door2_players", activeUser), {
+                            user: activeUser,
+                            x: player.x,
+                            y: player.y,
+                            color: playerColor,
+                            suit: activeSuit,
+                            lastUpdated: now
+                        }, { merge: true });
+                    } catch (e) {
+                        console.error("Sync error:", e);
+                    }
+                }
+            }
+
+            let peers = {};
+            onSnapshot(collection(db, "door2_players"), (snapshot) => {
+                const now = Date.now();
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    if (data.user !== activeUser && docSnap.id !== activeUser) {
+                        if (now - data.lastUpdated < 4000) {
+                            peers[docSnap.id] = data;
+                        } else {
+                            delete peers[docSnap.id];
+                        }
+                    }
+                });
             });
 
             function update() {
@@ -293,40 +434,49 @@
                     player.vy = 0;
                     player.grounded = true;
                 }
+
+                syncPositionToCloud();
             }
 
             function draw() {
-                ctx.fillStyle = "#00458a";
+                ctx.fillStyle = "#b58600";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                // Draw Branch Doors
                 doors.forEach(door => {
-                    ctx.fillStyle = "#002b5c";
+                    ctx.fillStyle = "#594200";
                     ctx.fillRect(door.x, door.y, door.w, door.h);
-                    ctx.strokeStyle = "#FFFFFF";
+                    ctx.strokeStyle = "#000000";
                     ctx.lineWidth = 2;
                     ctx.strokeRect(door.x, door.y, door.w, door.h);
 
-                    ctx.fillStyle = "#FFFFFF";
+                    ctx.fillStyle = "#000000";
                     ctx.font = "10px 'Courier New'";
                     ctx.textAlign = "center";
                     ctx.fillText(door.label, door.x + (door.w / 2), door.y - 8);
                 });
 
-                // Draw Platforms
-                ctx.fillStyle = "#FFFFFF";
+                ctx.fillStyle = "#000000";
                 platforms.forEach(plat => {
                     ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
                 });
 
-                // Draw Player
-                ctx.fillStyle = "#ffcc00";
+                for (const [peerName, pData] of Object.entries(peers)) {
+                    ctx.fillStyle = pData.color || "#000000";
+                    ctx.fillRect(pData.x, pData.y, 24, 36);
+
+                    ctx.fillStyle = "#000000";
+                    ctx.font = "10px 'Courier New'";
+                    ctx.textAlign = "center";
+                    ctx.fillText(`${peerName} [${pData.suit}]`, pData.x + 12, pData.y - 6);
+                }
+
+                ctx.fillStyle = playerColor;
                 ctx.fillRect(player.x, player.y, player.width, player.height);
 
-                ctx.fillStyle = "#FFFFFF";
+                ctx.fillStyle = "#000000";
                 ctx.font = "11px 'Courier New'";
                 ctx.textAlign = "center";
-                ctx.fillText("OPERATOR", player.x + (player.width / 2), player.y - 8);
+                ctx.fillText(`${activeUser} (YOU)`, player.x + (player.width / 2), player.y - 8);
             }
 
             function loop() {
