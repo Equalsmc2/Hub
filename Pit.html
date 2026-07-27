@@ -178,7 +178,7 @@
     </div>
 
     <div class="controls-hint">
-        OBJECTIVE: <strong>Old_seeker</strong>, <strong>Fabled_seeker</strong>, <strong>Strong_seeker</strong>, <strong>Written_seeker</strong>, and <strong>Mirror_seeker</strong> must occupy their designated pressure plates simultaneously to materialize the final exit. Press <strong>UP</strong> to enter when active.
+        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT</strong> to move, <strong>W / SPACE / UP</strong> to jump. Press <strong>UP</strong> to enter active doors.
     </div>
 
     <!-- Firebase SDK & Multiplayer Logic -->
@@ -280,27 +280,26 @@
                 grounded: false
             };
 
-            // Main floor containing 10 evenly distributed pressure plates
             const platforms = [
                 { x: 0, y: 410, w: 900, h: 40 }
             ];
 
-            // 10 plates across the floor layout
+            // 10 plates specifically mapped to the 10 authorized users
             const plates = [
-                { x: 50, y: 395, w: 60, h: 15, name: "Plate 1" },
-                { x: 130, y: 395, w: 60, h: 15, name: "Plate 2" },
-                { x: 210, y: 395, w: 60, h: 15, name: "Plate 3" },
-                { x: 290, y: 395, w: 60, h: 15, name: "Plate 4" },
-                { x: 370, y: 395, w: 60, h: 15, name: "Plate 5" },
-                { x: 450, y: 395, w: 60, h: 15, name: "Plate 6" },
-                { x: 530, y: 395, w: 60, h: 15, name: "Plate 7" },
-                { x: 610, y: 395, w: 60, h: 15, name: "Plate 8" },
-                { x: 690, y: 395, w: 60, h: 15, name: "Plate 9" },
-                { x: 770, y: 395, w: 60, h: 15, name: "Plate 10" }
+                { x: 40, y: 395, w: 70, h: 15, targetUser: "mneme_seeker", label: "Mneme" },
+                { x: 125, y: 395, w: 70, h: 15, targetUser: "mirror_seeker", label: "Mirror" },
+                { x: 210, y: 395, w: 70, h: 15, targetUser: "written_seeker", label: "Written" },
+                { x: 295, y: 395, w: 70, h: 15, targetUser: "faded_seeker", label: "Faded" },
+                { x: 380, y: 395, w: 70, h: 15, targetUser: "dule_seeker", label: "Dule" },
+                { x: 465, y: 395, w: 70, h: 15, targetUser: "old_seeker", label: "Old" },
+                { x: 550, y: 395, w: 70, h: 15, targetUser: "strong_seeker", label: "Strong" },
+                { x: 635, y: 395, w: 70, h: 15, targetUser: "weaveshaper_seeker", label: "Weaveshaper" },
+                { x: 720, y: 395, w: 70, h: 15, targetUser: "fabled_seeker", label: "Fabled" },
+                { x: 805, y: 395, w: 70, h: 15, targetUser: "prince_seeker", label: "Prince" }
             ];
 
-            // Final door that reveals only when Old, Fabled, Strong, Written, and Mirror are on plates
             const finalDoor = { x: 415, y: 220, w: 70, h: 100, url: "final_victory.html" };
+            const secretDoor = { x: 150, y: 220, w: 60, h: 90, url: "secret_chamber.html" };
 
             const gravity = 0.5;
             const keys = {};
@@ -319,6 +318,15 @@
                         player.y + player.height > finalDoor.y
                     ) {
                         window.location.href = finalDoor.url;
+                    }
+
+                    if (isSecretDoorUnlocked() &&
+                        player.x < secretDoor.x + secretDoor.w &&
+                        player.x + player.width > secretDoor.x &&
+                        player.y < secretDoor.y + secretDoor.h &&
+                        player.y + player.height > secretDoor.y
+                    ) {
+                        window.location.href = secretDoor.url;
                     }
                 }
             });
@@ -380,13 +388,11 @@
 
             function checkOccupants() {
                 let occupants = {};
-                // Check local user
                 plates.forEach((plate, idx) => {
                     if (isStandingOnPlate(player, plate)) {
                         occupants[idx] = activeUser.toLowerCase();
                     }
                 });
-                // Check peers
                 for (const [pName, pData] of Object.entries(peers)) {
                     if (pData.onPlate !== undefined && pData.onPlate >= 0) {
                         occupants[pData.onPlate] = pName.toLowerCase();
@@ -412,6 +418,18 @@
                 }
 
                 return hasOld && hasFabled && hasStrong && hasWritten && hasMirror;
+            }
+
+            function isSecretDoorUnlocked() {
+                const occ = checkOccupants();
+                let fadedPresent = false;
+                let oldPresent = false;
+
+                for (const user of Object.values(occ)) {
+                    if (user === "faded_seeker") fadedPresent = true;
+                    if (user === "old_seeker") oldPresent = true;
+                }
+                return fadedPresent && oldPresent;
             }
 
             function update() {
@@ -464,6 +482,7 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 const unlocked = isDoorUnlocked();
+                const secretUnlocked = isSecretDoorUnlocked();
 
                 // Draw Final Door
                 if (unlocked) {
@@ -473,9 +492,9 @@
                     ctx.strokeRect(finalDoor.x, finalDoor.y, finalDoor.w, finalDoor.h);
 
                     ctx.fillStyle = "#000000";
-                    ctx.font = "11px 'Courier New'";
+                    ctx.font = "10px 'Courier New'";
                     ctx.textAlign = "center";
-                    ctx.fillText("EXIT UNLOCKED", finalDoor.x + (finalDoor.w / 2), finalDoor.y + 50);
+                    ctx.fillText("EXIT", finalDoor.x + (finalDoor.w / 2), finalDoor.y + 50);
                 } else {
                     ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
                     ctx.fillRect(finalDoor.x, finalDoor.y, finalDoor.w, finalDoor.h);
@@ -483,9 +502,22 @@
                     ctx.strokeRect(finalDoor.x, finalDoor.y, finalDoor.w, finalDoor.h);
 
                     ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-                    ctx.font = "10px 'Courier New'";
+                    ctx.font = "9px 'Courier New'";
                     ctx.textAlign = "center";
-                    ctx.fillText("DOOR SEALED", finalDoor.x + (finalDoor.w / 2), finalDoor.y + 50);
+                    ctx.fillText("SEALED", finalDoor.x + (finalDoor.w / 2), finalDoor.y + 50);
+                }
+
+                // Draw Secret Door (Only shows when faded_seeker and old_seeker are on plates)
+                if (secretUnlocked) {
+                    ctx.fillStyle = "#00ffcc";
+                    ctx.fillRect(secretDoor.x, secretDoor.y, secretDoor.w, secretDoor.h);
+                    ctx.strokeStyle = "#FFFFFF";
+                    ctx.strokeRect(secretDoor.x, secretDoor.y, secretDoor.w, secretDoor.h);
+
+                    ctx.fillStyle = "#000000";
+                    ctx.font = "9px 'Courier New'";
+                    ctx.textAlign = "center";
+                    ctx.fillText("SECRET", secretDoor.x + (secretDoor.w / 2), secretDoor.y + 45);
                 }
 
                 // Draw Floor Platforms
@@ -494,7 +526,7 @@
                     ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
                 });
 
-                // Draw 10 Pressure Plates
+                // Draw 10 Pressure Plates with User Labels
                 const occupants = checkOccupants();
                 plates.forEach((plate, idx) => {
                     ctx.fillStyle = occupants[idx] ? "#00ffcc" : "#444444";
@@ -503,7 +535,7 @@
                     ctx.fillStyle = "#FFFFFF";
                     ctx.font = "8px 'Courier New'";
                     ctx.textAlign = "center";
-                    ctx.fillText(`P${idx + 1}`, plate.x + (plate.w / 2), plate.y - 4);
+                    ctx.fillText(plate.label, plate.x + (plate.w / 2), plate.y - 5);
                 });
 
                 // Draw Peers
