@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE_PIT // SECTOR_VOID</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #000000;
+            color: #FFFFFF;
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30px 50px;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .header-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px dashed #FFFFFF;
+            padding-bottom: 15px;
+        }
+
+        .system-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .user-hud {
+            font-size: 16px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .color-indicator {
+            width: 15px;
+            height: 15px;
+            display: inline-block;
+            border: 1px solid #FFFFFF;
+        }
+
+        .canvas-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin: 20px 0;
+        }
+
+        canvas {
+            background-color: #0a0a0a;
+            border: 4px solid #FFFFFF;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .controls-hint {
+            font-size: 14px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .back-link {
+            color: #FFFFFF;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: #cccccc;
+        }
+
+        #loginGate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .portal-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed #FFFFFF;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        input[type="text"] {
+            background: transparent;
+            border: 2px solid #FFFFFF;
+            color: #FFFFFF;
+            padding: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            width: 100%;
+            outline: none;
+            margin-bottom: 15px;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        button {
+            background: #FFFFFF;
+            color: #000000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #cccccc;
+        }
+
+        .error-text {
+            color: #ff8888;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN GATE OVERLAY -->
+    <div id="loginGate">
+        <div class="portal-box">
+            <div style="font-size: 24px; margin-bottom: 15px;">:(</div>
+            <div style="font-size: 18px; margin-bottom: 20px;">[INITIALIZING THE_PIT PROTOCOL]</div>
+            <div style="font-size: 14px; margin-bottom: 10px; text-align: left;">ENTER AUTHORIZED SEEKER ID:</div>
+            <input type="text" id="gateUsername" placeholder="e.g. Mneme_seeker">
+            <button onclick="enterPit()">DESCENT TO PIT</button>
+            <div id="gateError" class="error-text"></div>
+        </div>
+    </div>
+
+    <!-- ROOM MAIN INTERFACE -->
+    <div class="header-panel">
+        <div class="system-title">CHAMBER_STATUS: THE_PIT [TEN-PLATE MATRIX - CLOUD SYNC ACTIVE]</div>
+        <div class="user-hud">
+            <span>SEEKER: <strong id="hudUser">---</strong></span>
+            <span>TRAUMA SUIT: <strong id="hudSuit">---</strong></span>
+            <span>COLOR CODE: <span class="color-indicator" id="hudColorBox"></span></span>
+            <span class="back-link" onclick="returnToBranchA()">[RETURN TO BRANCH A]</span>
+        </div>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="hubCanvas" width="900" height="450"></canvas>
+    </div>
+
+    <div class="controls-hint">
+        OBJECTIVE: <strong>Old_seeker</strong>, <strong>Fabled_seeker</strong>, <strong>Strong_seeker</strong>, <strong>Written_seeker</strong>, and <strong>Mirror_seeker</strong> must occupy their designated pressure plates simultaneously to materialize the final exit. Press <strong>UP</strong> to enter when active.
+    </div>
+
+    <!-- Firebase SDK & Multiplayer Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBlgsx3uuat9oi2vwntXhInUcAe8N-veLY",
+            authDomain: "enter-f1c88.firebaseapp.com",
+            projectId: "enter-f1c88",
+            storageBucket: "enter-f1c88.appspot.com",
+            messagingSenderId: "794692963928",
+            appId: "1:794692963928:web:83fed114aed9389bf3042d",
+            measurementId: "G-PFGVSW5598"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const validUsers = [
+            "Mneme_seeker", "Mirror_seeker", "Written_seeker", 
+            "Faded_seeker", "Dule_Seeker", "Old_seeker", 
+            "Strong_seeker", "Weaveshaper_seeker", "Fabled_seeker",
+            "Prince_seeker"
+        ];
+
+        const seekerColors = {
+            "Mneme_seeker": "#ff3366",
+            "Mirror_seeker": "#33ffcc",
+            "Written_seeker": "#ffcc00",
+            "Faded_seeker": "#b8b8b8",
+            "Dule_Seeker": "#ff6600",
+            "Old_seeker": "#9933ff",
+            "Strong_seeker": "#33cc33",
+            "Weaveshaper_seeker": "#3399ff",
+            "Fabled_seeker": "#ff33ff",
+            "Prince_seeker": "#FFFF00"
+        };
+
+        let activeUser = "";
+        let activeSuit = "Unallocated";
+        let playerColor = "#FFFFFF";
+
+        window.enterPit = async function() {
+            const inputVal = document.getElementById('gateUsername').value.trim();
+            const errorDiv = document.getElementById('gateError');
+            const matchedUser = validUsers.find(u => u.toLowerCase() === inputVal.toLowerCase());
+
+            if (!matchedUser) {
+                errorDiv.textContent = "ERROR 0x80070002: Unknown Seeker ID profile.";
+                return;
+            }
+
+            activeUser = matchedUser;
+            
+            try {
+                const docSnap = await getDoc(doc(db, "trauma_suits", "allocations"));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    for (const [suit, user] of Object.entries(data)) {
+                        if (user.toLowerCase() === activeUser.toLowerCase()) {
+                            activeSuit = suit;
+                            break;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Could not fetch suit data", e);
+            }
+
+            playerColor = seekerColors[activeUser] || "#FFFFFF";
+
+            document.getElementById('hudUser').textContent = activeUser;
+            document.getElementById('hudSuit').textContent = activeSuit;
+            document.getElementById('hudColorBox').style.backgroundColor = playerColor;
+
+            document.getElementById('loginGate').style.display = 'none';
+            startPlatformerEngine();
+        }
+
+        window.returnToBranchA = function() {
+            window.location.href = "branch_a.html";
+        }
+
+        function startPlatformerEngine() {
+            const canvas = document.getElementById('hubCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let player = {
+                x: 100,
+                y: 350,
+                width: 24,
+                height: 36,
+                vx: 0,
+                vy: 0,
+                speed: 4,
+                jumpForce: -10,
+                grounded: false
+            };
+
+            // Main floor containing 10 evenly distributed pressure plates
+            const platforms = [
+                { x: 0, y: 410, w: 900, h: 40 }
+            ];
+
+            // 10 plates across the floor layout
+            const plates = [
+                { x: 50, y: 395, w: 60, h: 15, name: "Plate 1" },
+                { x: 130, y: 395, w: 60, h: 15, name: "Plate 2" },
+                { x: 210, y: 395, w: 60, h: 15, name: "Plate 3" },
+                { x: 290, y: 395, w: 60, h: 15, name: "Plate 4" },
+                { x: 370, y: 395, w: 60, h: 15, name: "Plate 5" },
+                { x: 450, y: 395, w: 60, h: 15, name: "Plate 6" },
+                { x: 530, y: 395, w: 60, h: 15, name: "Plate 7" },
+                { x: 610, y: 395, w: 60, h: 15, name: "Plate 8" },
+                { x: 690, y: 395, w: 60, h: 15, name: "Plate 9" },
+                { x: 770, y: 395, w: 60, h: 15, name: "Plate 10" }
+            ];
+
+            // Final door that reveals only when Old, Fabled, Strong, Written, and Mirror are on plates
+            const finalDoor = { x: 415, y: 220, w: 70, h: 100, url: "final_victory.html" };
+
+            const gravity = 0.5;
+            const keys = {};
+
+            window.addEventListener('keydown', (e) => {
+                if (["ArrowLeft", "ArrowRight", "ArrowUp", "Space", "KeyA", "KeyD", "KeyW"].includes(e.code)) {
+                    e.preventDefault();
+                }
+                keys[e.code] = true;
+
+                if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') {
+                    if (isDoorUnlocked() &&
+                        player.x < finalDoor.x + finalDoor.w &&
+                        player.x + player.width > finalDoor.x &&
+                        player.y < finalDoor.y + finalDoor.h &&
+                        player.y + player.height > finalDoor.y
+                    ) {
+                        window.location.href = finalDoor.url;
+                    }
+                }
+            });
+
+            window.addEventListener('keyup', (e) => {
+                keys[e.code] = false;
+            });
+
+            function isStandingOnPlate(ent, plate) {
+                return (
+                    ent.x < plate.x + plate.w &&
+                    ent.x + ent.width > plate.x &&
+                    Math.abs((ent.y + ent.height) - plate.y) < 10
+                );
+            }
+
+            let lastSync = 0;
+            async function syncPositionToCloud(force = false) {
+                const now = Date.now();
+                if (force || now - lastSync > 100) {
+                    lastSync = now;
+                    let localPlateIndex = -1;
+                    plates.forEach((plate, idx) => {
+                        if (isStandingOnPlate(player, plate)) {
+                            localPlateIndex = idx;
+                        }
+                    });
+
+                    try {
+                        await setDoc(doc(db, "pit_players", activeUser), {
+                            user: activeUser,
+                            x: player.x,
+                            y: player.y,
+                            color: playerColor,
+                            suit: activeSuit,
+                            onPlate: localPlateIndex,
+                            lastUpdated: now
+                        }, { merge: true });
+                    } catch (e) {
+                        console.error("Sync error:", e);
+                    }
+                }
+            }
+
+            let peers = {};
+            onSnapshot(collection(db, "pit_players"), (snapshot) => {
+                const now = Date.now();
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    if (data.user !== activeUser && docSnap.id !== activeUser) {
+                        if (now - data.lastUpdated < 4000) {
+                            peers[docSnap.id] = data;
+                        } else {
+                            delete peers[docSnap.id];
+                        }
+                    }
+                });
+            });
+
+            function checkOccupants() {
+                let occupants = {};
+                // Check local user
+                plates.forEach((plate, idx) => {
+                    if (isStandingOnPlate(player, plate)) {
+                        occupants[idx] = activeUser.toLowerCase();
+                    }
+                });
+                // Check peers
+                for (const [pName, pData] of Object.entries(peers)) {
+                    if (pData.onPlate !== undefined && pData.onPlate >= 0) {
+                        occupants[pData.onPlate] = pName.toLowerCase();
+                    }
+                }
+                return occupants;
+            }
+
+            function isDoorUnlocked() {
+                const occ = checkOccupants();
+                let hasOld = false;
+                let hasFabled = false;
+                let hasStrong = false;
+                let hasWritten = false;
+                let hasMirror = false;
+
+                for (const user of Object.values(occ)) {
+                    if (user === "old_seeker") hasOld = true;
+                    if (user === "fabled_seeker") hasFabled = true;
+                    if (user === "strong_seeker") hasStrong = true;
+                    if (user === "written_seeker") hasWritten = true;
+                    if (user === "mirror_seeker") hasMirror = true;
+                }
+
+                return hasOld && hasFabled && hasStrong && hasWritten && hasMirror;
+            }
+
+            function update() {
+                if (keys['ArrowLeft'] || keys['KeyA']) {
+                    player.vx = -player.speed;
+                } else if (keys['ArrowRight'] || keys['KeyD']) {
+                    player.vx = player.speed;
+                } else {
+                    player.vx *= 0.8;
+                }
+
+                player.vy += gravity;
+
+                if ((keys['ArrowUp'] || keys['Space'] || keys['KeyW']) && player.grounded) {
+                    player.vy = player.jumpForce;
+                    player.grounded = false;
+                }
+
+                player.x += player.vx;
+                if (player.x < 0) player.x = 0;
+                if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+                player.y += player.vy;
+                player.grounded = false;
+
+                platforms.forEach(plat => {
+                    if (
+                        player.x < plat.x + plat.w &&
+                        player.x + player.width > plat.x &&
+                        player.y + player.height > plat.y &&
+                        player.y + player.height - player.vy <= plat.y + 5
+                    ) {
+                        player.y = plat.y - player.height;
+                        player.vy = 0;
+                        player.grounded = true;
+                    }
+                });
+
+                if (player.y + player.height > canvas.height) {
+                    player.y = canvas.height - player.height;
+                    player.vy = 0;
+                    player.grounded = true;
+                }
+
+                syncPositionToCloud();
+            }
+
+            function draw() {
+                ctx.fillStyle = "#0a0a0a";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const unlocked = isDoorUnlocked();
+
+                // Draw Final Door
+                if (unlocked) {
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.fillRect(finalDoor.x, finalDoor.y, finalDoor.w, finalDoor.h);
+                    ctx.strokeStyle = "#888888";
+                    ctx.strokeRect(finalDoor.x, finalDoor.y, finalDoor.w, finalDoor.h);
+
+                    ctx.fillStyle = "#000000";
+                    ctx.font = "11px 'Courier New'";
+                    ctx.textAlign = "center";
+                    ctx.fillText("EXIT UNLOCKED", finalDoor.x + (finalDoor.w / 2), finalDoor.y + 50);
+                } else {
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+                    ctx.fillRect(finalDoor.x, finalDoor.y, finalDoor.w, finalDoor.h);
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+                    ctx.strokeRect(finalDoor.x, finalDoor.y, finalDoor.w, finalDoor.h);
+
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+                    ctx.font = "10px 'Courier New'";
+                    ctx.textAlign = "center";
+                    ctx.fillText("DOOR SEALED", finalDoor.x + (finalDoor.w / 2), finalDoor.y + 50);
+                }
+
+                // Draw Floor Platforms
+                ctx.fillStyle = "#FFFFFF";
+                platforms.forEach(plat => {
+                    ctx.fillRect(plat.x, plat.y, plat.w, plat.h);
+                });
+
+                // Draw 10 Pressure Plates
+                const occupants = checkOccupants();
+                plates.forEach((plate, idx) => {
+                    ctx.fillStyle = occupants[idx] ? "#00ffcc" : "#444444";
+                    ctx.fillRect(plate.x, plate.y, plate.w, plate.h);
+
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.font = "8px 'Courier New'";
+                    ctx.textAlign = "center";
+                    ctx.fillText(`P${idx + 1}`, plate.x + (plate.w / 2), plate.y - 4);
+                });
+
+                // Draw Peers
+                for (const [peerName, pData] of Object.entries(peers)) {
+                    ctx.fillStyle = pData.color || "#FFFFFF";
+                    ctx.fillRect(pData.x, pData.y, 24, 36);
+
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.font = "10px 'Courier New'";
+                    ctx.textAlign = "center";
+                    ctx.fillText(`${peerName}`, pData.x + 12, pData.y - 6);
+                }
+
+                // Draw Local Player
+                ctx.fillStyle = playerColor;
+                ctx.fillRect(player.x, player.y, player.width, player.height);
+
+                ctx.fillStyle = "#FFFFFF";
+                ctx.font = "11px 'Courier New'";
+                ctx.textAlign = "center";
+                ctx.fillText(`${activeUser} (YOU)`, player.x + (player.width / 2), player.y - 8);
+            }
+
+            function loop() {
+                update();
+                draw();
+                requestAnimationFrame(loop);
+            }
+
+            loop();
+        }
+    </script>
+</body>
+</html>
