@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE_HUB // SUB_GAMA // ARCHIVE_PAPER</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #050505;
+            color: #d3d3d3;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+
+        /* 
+        ================================================
+        STATE 1: THE SCIENTIFIC PAPER (POST-2003)
+        ================================================
+        */
+        #documentState {
+            width: 100%;
+            max-width: 900px;
+            background: #111;
+            border: 1px solid #333;
+            padding: 50px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.8), inset 0 0 50px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .classification {
+            color: #FF3333;
+            border: 2px solid #FF3333;
+            display: inline-block;
+            padding: 5px 10px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            transform: rotate(-2deg);
+            opacity: 0.8;
+        }
+
+        .doc-header {
+            border-bottom: 2px solid #555;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .doc-title {
+            font-size: 24px;
+            color: #FFF;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .doc-meta {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.6;
+        }
+
+        .doc-body {
+            font-size: 15px;
+            line-height: 1.8;
+            color: #ccc;
+            text-align: justify;
+        }
+
+        .doc-body p {
+            margin-bottom: 20px;
+        }
+
+        /* Glitched / Corrupted Text */
+        .corrupted {
+            color: #00FFCC;
+            background: rgba(0, 255, 204, 0.1);
+            font-weight: bold;
+            padding: 0 4px;
+            animation: glitch-anim 0.2s infinite alternate;
+            display: inline-block;
+            text-shadow: 2px 0 red, -2px 0 blue;
+        }
+
+        @keyframes glitch-anim {
+            0% { transform: skewX(0deg); opacity: 1; }
+            25% { transform: skewX(10deg); opacity: 0.8; }
+            50% { transform: skewX(-10deg); opacity: 0.9; }
+            75% { transform: skewX(5deg); opacity: 0.5; }
+            100% { transform: skewX(0deg); opacity: 1; }
+        }
+
+        .highlight-red {
+            color: #FF3333;
+            font-weight: bold;
+        }
+
+        .highlight-blue {
+            color: #3399FF;
+            font-weight: bold;
+        }
+
+        /* 
+        ================================================
+        STATE 2: MARCH 3, 2003 (THE ARG SECRET)
+        ================================================
+        */
+        #secretState {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            position: fixed;
+            top: 0; left: 0;
+            background: #000;
+            color: #00FF00;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 9999;
+        }
+
+        .secret-title {
+            font-size: 48px;
+            color: #FF0055;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #FF0055;
+            animation: pulseSecret 2s infinite;
+        }
+
+        @keyframes pulseSecret {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .secret-text {
+            font-size: 18px;
+            letter-spacing: 3px;
+            line-height: 2;
+            max-width: 600px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- THE POST-2003 SCIENTIFIC PAPER -->
+    <div id="documentState">
+        <div class="classification">TOP SECRET // EYES ONLY</div>
+        
+        <div class="doc-header">
+            <div class="doc-title">GEOLOGICAL & TACTICAL ANALYSIS: EXOPLANET "CRUCIBLE-9"</div>
+            <div class="doc-meta">
+                AUTHOR: Dr. Aris Thorne, Hub Materials Division<br>
+                DATE: [REDACTED]<br>
+                SUBJECT: Resource Extraction Feasibility and Conflict History
+            </div>
+        </div>
+
+        <div class="doc-body">
+            <p>
+                Crucible-9 represents a planetary anomaly of extreme proportions. It is a tidally locked super-Earth, meaning its rotation precisely matches its orbit around its host star. Consequently, the planet is permanently divided into two hemispherical extremes. The day-side is a scorching, hyper-arid wasteland of molten rock and violent atmospheric combustion. The night-side is plunged into perpetual darkness, characterized by absolute-zero temperatures and massive cryogenic ice shelves.
+            </p>
+
+            <p>
+                Standard planetary models dictate this world should be geologically dead. However, extensive scans reveal that Crucible-9 possesses a <span class="corrupted">*%^*#&(*^</span> spanning the entire terminator line (the twilight zone dividing the two halves), and operates with a massive <span class="corrupted">@&%**(^</span> at its core. 
+            </p>
+
+            <p>
+                The friction between the planet's freezing crust and its boiling mantle, driven by the <span class="corrupted">@&%**(^</span>, acts as a cosmic refinery. This unique pressure cooker environment synthesizes the universe's two most valuable and volatile materials.
+            </p>
+
+            <p>
+                On the dark side, the intense cold and crushing gravity crystallize digital memory structures into physical matter, resulting in vast subterranean veins of <span class="highlight-blue">Cryorised Opal</span>. Conversely, the thermal extremes of the day-side melt organic and synthetic compounds into a hyper-conductive, liquid data-state known as <span class="highlight-red">Ichor</span>.
+            </p>
+
+            <p>
+                Because these two resources are the sole foundation of the Hub's mainframe computing power and the Trauma Suit neural-link technology, Crucible-9 has not known peace since its discovery.
+            </p>
+
+            <p>
+                For over three centuries, it has been the primary theater of war. Factions deploy Harvester Drones into the scorching day-side to pump Ichor from the planet's bleeding mantle, while specialized Seekers, equipped with early-model Trauma Suits, brave the absolute-zero night-side to chisel Cryorised Opal from the dark ice. The casualties are incalculable, but the resources are deemed mandatory for our survival. 
+            </p>
+
+            <p>
+                <em>Addendum: Due to the increasing instability of the <span class="corrupted">@&%**(^</span> at the core, mining operations are reporting elevated rates of cognitive assimilation among Seekers. The planet is not just producing materials; we hypothesize it is beginning to process the minds of those who die on it.</em>
+            </p>
+        </div>
+    </div>
+
+    <!-- THE MARCH 3, 2003 ARG SECRET TERMINAL -->
+    <div id="secretState">
+        <div class="secret-title">SUB_GAMA // ROOT_ACCESS_GRANTED</div>
+        <div class="secret-text">
+            <p>TEMPORAL ANOMALY DETECTED.</p>
+            <p>YOU HAVE ARRIVED BEFORE THE WAR BEGAN.</p>
+            <br>
+            <p style="color: #FFF;">The core is quiet today.</p>
+            <p style="color: #FFF;">The Ichor has not yet spilled.</p>
+            <p style="color: #FFF;">The Opal has not yet frozen over the graves.</p>
+            <br>
+            <p style="color: #FF3333; font-weight: bold;">DO NOT LET THEM BUILD THE TRAUMA SUITS.</p>
+        </div>
+    </div>
+
+    <!-- TIME CHECK SCRIPT -->
+    <script>
+        // Execute temporal lock logic immediately upon loading
+        function checkTemporalLock() {
+            const now = new Date();
+            
+            // Note: In JavaScript, months are 0-indexed (0 = Jan, 1 = Feb, 2 = March)
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const day = now.getDate();
+
+            const paperState = document.getElementById('documentState');
+            const secretState = document.getElementById('secretState');
+
+            // Check if the date is exactly March 3, 2003
+            if (year === 2003 && month === 2 && day === 3) {
+                // Unlock the ARG Secret
+                document.body.style.backgroundColor = "#000";
+                paperState.style.display = "none";
+                secretState.style.display = "flex";
+                console.log("TEMPORAL LOCK BYPASSED. WELCOME TO 2003.");
+            } else {
+                // Ensure default state (Paper) is shown
+                paperState.style.display = "block";
+                secretState.style.display = "none";
+            }
+        }
+
+        // Run check on load
+        window.onload = checkTemporalLock;
+    </script>
+</body>
+</html>
