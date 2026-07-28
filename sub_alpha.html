@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE_HUB // SECTOR_ALPHA_BULLET_HELL</title>
+    <title>THE_HUB // SECTOR_ALPHA_VIRUS</title>
     <style>
         * {
             box-sizing: border-box;
@@ -12,9 +12,9 @@
         }
 
         body {
-            background-color: #550000;
-            color: #FF5555;
-            font-family: 'Courier New', Courier, monospace;
+            background-color: #FFFF00;
+            color: #000000;
+            font-family: "Comic Sans MS", "Courier New", Courier, monospace;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -28,13 +28,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px dashed #FF5555;
+            border-bottom: 4px dashed #FF0000;
             padding-bottom: 15px;
+            background-color: #000000;
+            color: #FFFF00;
+            padding: 10px 20px;
         }
 
         .system-title {
             font-size: 20px;
             font-weight: bold;
+            animation: blinkTitle 0.5s infinite alternate;
+        }
+
+        @keyframes blinkTitle {
+            0% { color: #FFFF00; }
+            100% { color: #FF0000; }
         }
 
         .user-hud {
@@ -48,7 +57,7 @@
             width: 15px;
             height: 15px;
             display: inline-block;
-            border: 1px solid #FF5555;
+            border: 2px solid #FF0000;
         }
 
         .canvas-container {
@@ -61,29 +70,31 @@
         }
 
         canvas {
-            background-color: #220000;
-            border: 4px solid #FF5555;
-            box-shadow: 0 0 25px rgba(255,0,0,0.4);
+            background-color: #FFFFFF;
+            border: 6px solid #FF0000;
+            box-shadow: 0 0 30px rgba(255,0,0,0.8);
             cursor: none;
         }
 
         .controls-hint {
             font-size: 14px;
             text-align: center;
-            background: rgba(255, 0, 0, 0.1);
+            background: #000000;
+            color: #FFFF00;
             padding: 10px;
-            border: 1px solid rgba(255, 85, 85, 0.3);
+            border: 2px solid #FF0000;
+            font-weight: bold;
         }
 
         .back-link {
-            color: #FF5555;
+            color: #FFFF00;
             text-decoration: underline;
             cursor: pointer;
             font-size: 14px;
         }
 
         .back-link:hover {
-            color: #FFFFFF;
+            color: #FF0000;
         }
 
         #loginGate {
@@ -92,7 +103,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: #550000;
+            background: #FFFF00;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -102,34 +113,36 @@
         }
 
         .portal-box {
-            background: rgba(0, 0, 0, 0.4);
-            border: 2px dashed #FF5555;
+            background: #000000;
+            border: 4px dashed #FF0000;
             padding: 30px;
             max-width: 500px;
             width: 100%;
             text-align: center;
+            color: #FFFF00;
         }
 
         input[type="text"] {
-            background: transparent;
-            border: 2px solid #FF5555;
-            color: #FF5555;
+            background: #FFFF00;
+            border: 3px solid #FF0000;
+            color: #000000;
             padding: 10px;
             font-family: 'Courier New', Courier, monospace;
             font-size: 16px;
             width: 100%;
             outline: none;
             margin-bottom: 15px;
+            font-weight: bold;
         }
 
         input::placeholder {
-            color: rgba(255, 85, 85, 0.5);
+            color: rgba(0, 0, 0, 0.5);
         }
 
         button {
-            background: #FF5555;
-            color: #550000;
-            border: none;
+            background: #FF0000;
+            color: #FFFF00;
+            border: 2px solid #000000;
             padding: 10px 20px;
             font-family: 'Courier New', Courier, monospace;
             font-weight: bold;
@@ -139,13 +152,15 @@
         }
 
         button:hover {
-            background: #FFFFFF;
+            background: #FFFF00;
+            color: #FF0000;
         }
 
         .error-text {
-            color: #FFAAAA;
+            color: #FF0000;
             margin-top: 10px;
             font-size: 14px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -154,18 +169,18 @@
     <!-- LOGIN GATE OVERLAY -->
     <div id="loginGate">
         <div class="portal-box">
-            <div style="font-size: 24px; margin-bottom: 15px; color: #FF5555;">:(</div>
-            <div style="font-size: 18px; margin-bottom: 20px; color: #FF5555;">[INITIALIZING BULLET HELL PROTOCOL]</div>
-            <div style="font-size: 14px; margin-bottom: 10px; text-align: left; color: #FF5555;">ENTER AUTHORIZED SEEKER ID:</div>
+            <div style="font-size: 32px; margin-bottom: 15px; color: #FF0000; font-weight: bold;">YOU ARE AN IDIOT :)</div>
+            <div style="font-size: 16px; margin-bottom: 20px; color: #FFFF00;">[SECTOR ALPHA INFESTATION PROTOCOL]</div>
+            <div style="font-size: 14px; margin-bottom: 10px; text-align: left; color: #FFFF00;">ENTER AUTHORIZED SEEKER ID:</div>
             <input type="text" id="gateUsername" placeholder="e.g. Mneme_seeker">
-            <button onclick="enterBulletHell()">ENGAGE PROTOCOL</button>
+            <button onclick="enterVirusHell()">INFEST</button>
             <div id="gateError" class="error-text"></div>
         </div>
     </div>
 
     <!-- ROOM MAIN INTERFACE -->
     <div class="header-panel">
-        <div class="system-title">CHAMBER_STATUS: SECTOR_ALPHA [BULLET HELL SURVIVAL - 60s]</div>
+        <div class="system-title">HA! HA! HA! YOU ARE AN IDIOT // SURVIVE 30s</div>
         <div class="user-hud">
             <span>SEEKER: <strong id="hudUser">---</strong></span>
             <span>TRAUMA SUIT: <strong id="hudSuit">---</strong></span>
@@ -179,7 +194,7 @@
     </div>
 
     <div class="controls-hint">
-        CONTROLS: Use <strong>ARROW KEYS</strong> or <strong>W/A/S/D</strong> to freely dodge. Survive 60 seconds to manifest the exit gateway.
+        CONTROLS: Use <strong>ARROW KEYS</strong> or <strong>W/A/S/D</strong> to dodge the bouncing idiot smileys for <strong>30 seconds</strong>!
     </div>
 
     <!-- Firebase SDK & Multiplayer Logic -->
@@ -224,13 +239,13 @@
         let activeSuit = "Unallocated";
         let playerColor = "#FF5555";
 
-        window.enterBulletHell = async function() {
+        window.enterVirusHell = async function() {
             const inputVal = document.getElementById('gateUsername').value.trim();
             const errorDiv = document.getElementById('gateError');
             const matchedUser = validUsers.find(u => u.toLowerCase() === inputVal.toLowerCase());
 
             if (!matchedUser) {
-                errorDiv.textContent = "ERROR 0x80070002: Unknown Seeker ID profile.";
+                errorDiv.textContent = "ERROR: Unknown Seeker ID profile.";
                 return;
             }
 
@@ -251,45 +266,44 @@
                 console.error("Could not fetch suit data", e);
             }
 
-            playerColor = seekerColors[activeUser] || "#FF5555";
+            playerColor = seekerColors[activeUser] || "#FF0000";
 
             document.getElementById('hudUser').textContent = activeUser;
             document.getElementById('hudSuit').textContent = activeSuit;
             document.getElementById('hudColorBox').style.backgroundColor = playerColor;
 
             document.getElementById('loginGate').style.display = 'none';
-            startBulletHellEngine();
+            startVirusEngine();
         }
 
         window.returnToDoor3 = function() {
             window.location.href = "door3.html";
         }
 
-        function startBulletHellEngine() {
+        function startVirusEngine() {
             const canvas = document.getElementById('hubCanvas');
             const ctx = canvas.getContext('2d');
 
             let player = {
                 x: 450,
-                y: 350,
-                radius: 8,
-                speed: 5,
+                y: 225,
+                radius: 12,
+                speed: 4.5,
                 hp: 100
             };
 
-            let boss = {
-                x: 450,
-                y: 80,
-                radius: 25,
-                angle: 0,
-                attackTimer: 0
-            };
+            // Simpler, easier hazard projectiles inspired by the classic virus bouncing smileys
+            let bullets = [
+                { x: 100, y: 100, vx: 2.5, vy: 2.0, radius: 18 },
+                { x: 800, y: 100, vx: -2.2, vy: 2.5, radius: 18 },
+                { x: 450, y: 350, vx: 2.0, vy: -2.3, radius: 18 },
+                { x: 200, y: 300, vx: -2.5, vy: -2.0, radius: 18 }
+            ];
 
-            let bullets = [];
             let startTime = Date.now();
-            let survivalDuration = 60000; // 60 seconds
+            let survivalDuration = 30000; // 30 seconds (easier)
             let trialWon = false;
-            let exitDoor = { x: 410, y: 180, w: 80, h: 90, active: false };
+            let exitDoor = { x: 405, y: 175, w: 90, h: 100, active: false };
 
             const keys = {};
 
@@ -356,7 +370,6 @@
                     exitDoor.active = true;
                 }
 
-                // Free-roam 360 movement
                 let dx = 0;
                 let dy = 0;
                 if (keys['ArrowLeft'] || keys['KeyA']) dx -= 1;
@@ -372,150 +385,117 @@
                 player.x += dx * player.speed;
                 player.y += dy * player.speed;
 
-                // Canvas boundaries
                 if (player.x < player.radius) player.x = player.radius;
                 if (player.x > canvas.width - player.radius) player.x = canvas.width - player.radius;
                 if (player.y < player.radius) player.y = player.radius;
                 if (player.y > canvas.height - player.radius) player.y = canvas.height - player.radius;
 
-                if (!trialWon) {
-                    // Intense Bullet Hell patterns
-                    boss.angle += 0.08;
-                    boss.attackTimer++;
-
-                    // Pattern 1: Spiral Wave
-                    if (boss.attackTimer % 3 === 0) {
-                        let arms = 5;
-                        for (let i = 0; i < arms; i++) {
-                            let bulletAngle = boss.angle + (i * ((Math.PI * 2) / arms));
-                            bullets.push({
-                                x: boss.x,
-                                y: boss.y,
-                                vx: Math.cos(bulletAngle) * 4.5,
-                                vy: Math.sin(bulletAngle) * 4.5,
-                                radius: 5
-                            });
-                        }
-                    }
-
-                    // Pattern 2: Direct Sniper Bursts
-                    if (boss.attackTimer % 45 === 0) {
-                        let angleToPlayer = Math.atan2(player.y - boss.y, player.x - boss.x);
-                        for (let offset = -0.3; offset <= 0.3; offset += 0.15) {
-                            bullets.push({
-                                x: boss.x,
-                                y: boss.y,
-                                vx: Math.cos(angleToPlayer + offset) * 6,
-                                vy: Math.sin(angleToPlayer + offset) * 6,
-                                radius: 6
-                            });
-                        }
-                    }
-                }
-
-                // Update Bullets & Collisions
-                for (let i = bullets.length - 1; i >= 0; i--) {
-                    let b = bullets[i];
+                // Bouncing virus smileys wall collision logic
+                bullets.forEach(b => {
                     b.x += b.vx;
                     b.y += b.vy;
 
-                    // Hitbox check with player core
+                    if (b.x - b.radius < 0 || b.x + b.radius > canvas.width) {
+                        b.vx *= -1;
+                    }
+                    if (b.y - b.radius < 0 || b.y + b.radius > canvas.height) {
+                        b.vy *= -1;
+                    }
+
+                    // Collision check with player
                     let dist = Math.hypot(player.x - b.x, player.y - b.y);
                     if (dist < player.radius + b.radius) {
-                        player.hp -= 20;
-                        bullets.splice(i, 1);
+                        player.hp -= 15;
                         if (player.hp <= 0) {
                             player.hp = 100;
                             player.x = 450;
-                            player.y = 350;
-                            startTime = Date.now(); // Penalty reset
+                            player.y = 225;
+                            startTime = Date.now();
                         }
-                        continue;
                     }
-
-                    // Out of bounds cleanup
-                    if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
-                        bullets.splice(i, 1);
-                    }
-                }
+                });
 
                 syncPositionToCloud();
             }
 
             function draw() {
-                ctx.fillStyle = "#220000";
+                // Flashing aesthetic background effect
+                ctx.fillStyle = Math.floor(Date.now() / 200) % 2 === 0 ? "#FFFF00" : "#FF0000";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 let remainingSecs = Math.max(0, Math.ceil((survivalDuration - (Date.now() - startTime)) / 1000));
 
                 // Draw Exit Door if trial is won
                 if (exitDoor.active) {
-                    ctx.fillStyle = "rgba(0, 255, 204, 0.2)";
+                    ctx.fillStyle = "#00FF00";
                     ctx.fillRect(exitDoor.x, exitDoor.y, exitDoor.w, exitDoor.h);
-                    ctx.strokeStyle = "#00FFCC";
-                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = "#000000";
+                    ctx.lineWidth = 4;
                     ctx.strokeRect(exitDoor.x, exitDoor.y, exitDoor.w, exitDoor.h);
 
-                    ctx.fillStyle = "#00FFCC";
-                    ctx.font = "12px 'Courier New'";
+                    ctx.fillStyle = "#000000";
+                    ctx.font = "bold 14px 'Comic Sans MS'";
                     ctx.textAlign = "center";
-                    ctx.fillText("EXIT GATE", exitDoor.x + (exitDoor.w / 2), exitDoor.y - 10);
+                    ctx.fillText("EXIT DOOR!", exitDoor.x + (exitDoor.w / 2), exitDoor.y - 12);
                 }
 
-                // Draw UI Status Bar
-                ctx.fillStyle = "rgba(0,0,0,0.7)";
+                // Draw UI Status Box
+                ctx.fillStyle = "#000000";
                 ctx.fillRect(250, 15, 400, 30);
-                ctx.strokeStyle = "#FF5555";
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = "#FFFF00";
+                ctx.lineWidth = 3;
                 ctx.strokeRect(250, 15, 400, 30);
 
-                ctx.fillStyle = trialWon ? "#00FFCC" : "#FF5555";
-                ctx.font = "14px 'Courier New'";
+                ctx.fillStyle = trialWon ? "#00FF00" : "#FFFF00";
+                ctx.font = "bold 14px 'Courier New'";
                 ctx.textAlign = "center";
-                ctx.fillText(trialWon ? "GATEWAY UNLOCKED: ENTER TO PROCEED" : `SURVIVE: ${remainingSecs}s // HP: ${player.hp}`, 450, 35);
+                ctx.fillText(trialWon ? "YOU ARE NOT AN IDIOT! ENTER DOOR" : `SURVIVE: ${remainingSecs}s // HP: ${player.hp}`, 450, 35);
 
-                // Draw Boss Core
-                ctx.fillStyle = "#FF1111";
-                ctx.beginPath();
-                ctx.arc(boss.x, boss.y, boss.radius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = "#FFFFFF";
-                ctx.stroke();
-
-                // Draw Bullets
-                ctx.fillStyle = "#FFAAAA";
+                // Draw Virus Smileys (You Are An Idiot Style Faces)
                 bullets.forEach(b => {
+                    ctx.fillStyle = "#FFFFFF";
                     ctx.beginPath();
                     ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
                     ctx.fill();
+                    ctx.strokeStyle = "#000000";
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+
+                    // Smiley eyes & grin
+                    ctx.fillStyle = "#000000";
+                    ctx.fillRect(b.x - 6, b.y - 6, 4, 4);
+                    ctx.fillRect(b.x + 2, b.y - 6, 4, 4);
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y + 3, 6, 0, Math.PI);
+                    ctx.stroke();
                 });
 
                 // Draw Peers
                 for (const [peerName, pData] of Object.entries(peers)) {
-                    ctx.fillStyle = pData.color || "#FF5555";
+                    ctx.fillStyle = pData.color || "#000000";
                     ctx.beginPath();
-                    ctx.arc(pData.x, pData.y, 8, 0, Math.PI * 2);
+                    ctx.arc(pData.x, pData.y, 10, 0, Math.PI * 2);
                     ctx.fill();
 
-                    ctx.fillStyle = "#FF5555";
-                    ctx.font = "10px 'Courier New'";
+                    ctx.fillStyle = "#000000";
+                    ctx.font = "bold 10px 'Courier New'";
                     ctx.textAlign = "center";
-                    ctx.fillText(peerName, pData.x, pData.y - 12);
+                    ctx.fillText(peerName, pData.x, pData.y - 14);
                 }
 
-                // Draw Local Player Hitbox Core
+                // Draw Local Player
                 ctx.fillStyle = playerColor;
                 ctx.beginPath();
                 ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.strokeStyle = "#FFFFFF";
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 3;
                 ctx.stroke();
 
-                ctx.fillStyle = "#FF5555";
-                ctx.font = "11px 'Courier New'";
+                ctx.fillStyle = "#000000";
+                ctx.font = "bold 11px 'Courier New'";
                 ctx.textAlign = "center";
-                ctx.fillText(`${activeUser} (YOU)`, player.x, player.y - 14);
+                ctx.fillText(`${activeUser}`, player.x, player.y - 16);
             }
 
             function loop() {
