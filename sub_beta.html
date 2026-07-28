@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE_HUB // SECTOR_VOID_SUB_BETA</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #550000;
+            color: #FF5555;
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px 40px;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .header-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px dashed #FF5555;
+            padding-bottom: 10px;
+        }
+
+        .system-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .user-hud {
+            font-size: 14px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .color-indicator {
+            width: 15px;
+            height: 15px;
+            display: inline-block;
+            border: 1px solid #FF5555;
+        }
+
+        .main-workspace {
+            display: flex;
+            gap: 20px;
+            flex-grow: 1;
+            margin: 20px 0;
+        }
+
+        .grid-container {
+            flex: 1;
+            background: #330000;
+            border: 3px solid #FF5555;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        canvas {
+            background-color: #1a0000;
+            border: 2px solid #FF5555;
+            box-shadow: 0 0 15px rgba(255,0,0,0.3);
+        }
+
+        .editor-container {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.5);
+            border: 3px solid #FF5555;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+        }
+
+        .editor-header {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #FFAAAA;
+            border-bottom: 1px dashed #FF5555;
+            padding-bottom: 5px;
+        }
+
+        textarea {
+            flex-grow: 1;
+            background: #110000;
+            color: #FFAAAA;
+            border: 2px solid #FF5555;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            line-height: 1.4;
+        }
+
+        .editor-footer {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        button {
+            background: #FF5555;
+            color: #550000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #FFFFFF;
+        }
+
+        .status-text {
+            font-size: 13px;
+            color: #FFAAAA;
+        }
+
+        .back-link {
+            color: #FF5555;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: #FFFFFF;
+        }
+
+        #loginGate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #550000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .portal-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px dashed #FF5555;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        input[type="text"] {
+            background: transparent;
+            border: 2px solid #FF5555;
+            color: #FF5555;
+            padding: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            width: 100%;
+            outline: none;
+            margin-bottom: 15px;
+        }
+
+        input::placeholder {
+            color: rgba(255, 85, 85, 0.5);
+        }
+
+        .error-text {
+            color: #FFAAAA;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN GATE OVERLAY -->
+    <div id="loginGate">
+        <div class="portal-box">
+            <div style="font-size: 24px; margin-bottom: 15px; color: #FF5555;">:(</div>
+            <div style="font-size: 18px; margin-bottom: 20px; color: #FF5555;">[INITIALIZING SUB_BETA PROTOCOL]</div>
+            <div style="font-size: 14px; margin-bottom: 10px; text-align: left; color: #FF5555;">ENTER AUTHORIZED SEEKER ID:</div>
+            <input type="text" id="gateUsername" placeholder="e.g. Mneme_seeker">
+            <button onclick="enterPuzzle()">ACCESS LOGIC TERMINAL</button>
+            <div id="gateError" class="error-text"></div>
+        </div>
+    </div>
+
+    <!-- ROOM MAIN INTERFACE -->
+    <div class="header-panel">
+        <div class="system-title">CHAMBER_STATUS: SUB_BETA [ICHOR HARVESTER LOGIC PUZZLE]</div>
+        <div class="user-hud">
+            <span>SEEKER: <strong id="hudUser">---</strong></span>
+            <span>TRAUMA SUIT: <strong id="hudSuit">---</strong></span>
+            <span>COLOR CODE: <span class="color-indicator" id="hudColorBox"></span></span>
+            <span class="back-link" onclick="returnToDoorden()">[RETURN TO DOOR 3]</span>
+        </div>
+    </div>
+
+    <div class="main-workspace">
+        <div class="grid-container">
+            <canvas id="puzzleCanvas" width="400" height="400"></canvas>
+        </div>
+        <div class="editor-container">
+            <div class="editor-header">PYTHON_EDITOR_v1.0 // HARVESTER_COMMANDS.py</div>
+            <textarea id="pythonCode" spellcheck="false"># Objective: Collect Ichor in sequence: RED -> GOLD -> BLUE
+# Available functions: move('UP'), move('DOWN'), move('LEFT'), move('RIGHT'), grab()
+
+move('RIGHT')
+grab()
+</textarea>
+            <div class="editor-footer">
+                <span id="execStatus" class="status-text">STATUS: WAITING FOR EXECUTION</span>
+                <button onclick="runPythonCode()">RUN SCRIPT</button>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; font-size: 13px; opacity: 0.8;">
+        DIRECTIVE: Write Python syntax to command the Trauma Unit Harvester drone to retrieve Ichor vials in exact color order (Red $\rightarrow$ Gold $\rightarrow$ Blue).
+    </div>
+
+    <!-- Firebase SDK & Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBlgsx3uuat9oi2vwntXhInUcAe8N-veLY",
+            authDomain: "enter-f1c88.firebaseapp.com",
+            projectId: "enter-f1c88",
+            storageBucket: "enter-f1c88.appspot.com",
+            messagingSenderId: "794692963928",
+            appId: "1:794692963928:web:83fed114aed9389bf3042d",
+            measurementId: "G-PFGVSW5598"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const validUsers = [
+            "Mneme_seeker", "Mirror_seeker", "Written_seeker", 
+            "Faded_seeker", "Dule_Seeker", "Old_seeker", 
+            "Strong_seeker", "Weaveshaper_seeker", "Fabled_seeker",
+            "Prince_seeker"
+        ];
+
+        const seekerColors = {
+            "Mneme_seeker": "#ff3366",
+            "Mirror_seeker": "#33ffcc",
+            "Written_seeker": "#ffcc00",
+            "Faded_seeker": "#b8b8b8",
+            "Dule_Seeker": "#ff6600",
+            "Old_seeker": "#9933ff",
+            "Strong_seeker": "#33cc33",
+            "Weaveshaper_seeker": "#3399ff",
+            "Fabled_seeker": "#ff33ff",
+            "Prince_seeker": "#FFFF00"
+        };
+
+        let activeUser = "";
+        let activeSuit = "Unallocated";
+        let playerColor = "#FF5555";
+
+        window.enterPuzzle = async function() {
+            const inputVal = document.getElementById('gateUsername').value.trim();
+            const errorDiv = document.getElementById('gateError');
+            const matchedUser = validUsers.find(u => u.toLowerCase() === inputVal.toLowerCase());
+
+            if (!matchedUser) {
+                errorDiv.textContent = "ERROR 0x80070002: Unknown Seeker ID profile.";
+                return;
+            }
+
+            activeUser = matchedUser;
+            
+            try {
+                const docSnap = await getDoc(doc(db, "trauma_suits", "allocations"));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    for (const [suit, user] of Object.entries(data)) {
+                        if (user.toLowerCase() === activeUser.toLowerCase()) {
+                            activeSuit = suit;
+                            break;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Could not fetch suit data", e);
+            }
+
+            playerColor = seekerColors[activeUser] || "#FF5555";
+
+            document.getElementById('hudUser').textContent = activeUser;
+            document.getElementById('hudSuit').textContent = activeSuit;
+            document.getElementById('hudColorBox').style.backgroundColor = playerColor;
+
+            document.getElementById('loginGate').style.display = 'none';
+            initPuzzleGrid();
+        }
+
+        window.returnToDoorden = function() {
+            window.location.href = "door3.html";
+        }
+
+        let canvas, ctx;
+        const tileSize = 80;
+        let robot = { x: 0, y: 4 }; // 5x5 grid (0 to 4)
+        let sequenceTarget = ["RED", "GOLD", "BLUE"];
+        let collectedSequence = [];
+
+        let items = [
+            { x: 2, y: 2, color: "RED", type: "RED", collected: false },
+            { x: 4, y: 0, color: "GOLD", type: "GOLD", collected: false },
+            { x: 1, y: 1, color: "BLUE", type: "BLUE", collected: false }
+        ];
+
+        function initPuzzleGrid() {
+            canvas = document.getElementById('puzzleCanvas');
+            ctx = canvas.getContext('2d');
+            drawGrid();
+        }
+
+        function drawGrid() {
+            ctx.fillStyle = "#1a0000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid lines
+            ctx.strokeStyle = "rgba(255, 85, 85, 0.2)";
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * tileSize, 0);
+                ctx.lineTo(i * tileSize, 400);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, i * tileSize);
+                ctx.lineTo(400, i * tileSize);
+                ctx.stroke();
+            }
+
+            // Draw Ichor Items
+            items.forEach(item => {
+                if (!item.collected) {
+                    ctx.fillStyle = item.color === "RED" ? "#FF3333" : (item.color === "GOLD" ? "#FFCC00" : "#3399FF");
+                    ctx.beginPath();
+                    ctx.arc((item.x * tileSize) + 40, (item.y * tileSize) + 40, 18, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = "#FFFFFF";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            });
+
+            // Draw Harvester Robot
+            ctx.fillStyle = playerColor;
+            ctx.fillRect((robot.x * tileSize) + 20, (robot.y * tileSize) + 20, 40, 40);
+            ctx.strokeStyle = "#FFFFFF";
+            ctx.lineWidth = 2;
+            ctx.strokeRect((robot.x * tileSize) + 20, (robot.y * tileSize) + 20, 40, 40);
+
+            ctx.fillStyle = "#FFFFFF";
+            ctx.font = "10px 'Courier New'";
+            ctx.textAlign = "center";
+            ctx.fillText("BOT", (robot.x * tileSize) + 40, (robot.y * tileSize) + 45);
+        }
+
+        window.runPythonCode = async function() {
+            const code = document.getElementById('pythonCode').value;
+            const statusEl = document.getElementById('execStatus');
+            
+            // Reset state
+            robot = { x: 0, y: 4 };
+            items.forEach(i => i.collected = false);
+            collectedSequence = [];
+            drawGrid();
+
+            statusEl.textContent = "STATUS: EXECUTING SCRIPT...";
+            statusEl.style.color = "#FFCC00";
+
+            let lines = code.split('\n');
+            let delay = 0;
+
+            for (let line of lines) {
+                line = line.trim();
+                if (!line || line.startsWith('#')) continue;
+
+                await new Promise(r => setTimeout(r, 400));
+
+                if (line.startsWith("move(")) {
+                    let dir = line.match(/'([^']+)'/)?.[1];
+                    if (dir === 'UP' && robot.y > 0) robot.y--;
+                    if (dir === 'DOWN' && robot.y < 4) robot.y++;
+                    if (dir === 'LEFT' && robot.x > 0) robot.x--;
+                    if (dir === 'RIGHT' && robot.x < 4) robot.x++;
+                } else if (line === "grab()") {
+                    let foundItem = items.find(i => i.x === robot.x && i.y === robot.y && !i.collected);
+                    if (foundItem) {
+                        foundItem.collected = true;
+                        collectedSequence.push(foundItem.type);
+                    }
+                }
+                drawGrid();
+            }
+
+            // Verify Sequence: RED -> GOLD -> BLUE
+            let success = collectedSequence.length === 3 &&
+                          collectedSequence[0] === "RED" &&
+                          collectedSequence[1] === "GOLD" &&
+                          collectedSequence[2] === "BLUE";
+
+            if (success) {
+                statusEl.textContent = "SUCCESS: SEQUENCE VALIDATED. PROCEEDING...";
+                statusEl.style.color = "#00FFCC";
+                setTimeout(() => {
+                    window.location.href = "door3.html";
+                }, 1500);
+            } else {
+                statusEl.textContent = "ERROR: INVALID SEQUENCE OR MISSED TARGETS.";
+                statusEl.style.color = "#FF3333";
+            }
+        }
+    </script>
+</body>
+</html>
