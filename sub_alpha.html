@@ -22,12 +22,7 @@
             padding: 20px 40px;
             overflow: hidden;
             user-select: none;
-            animation: bgPulse 0.4s infinite alternate;
-        }
-
-        @keyframes bgPulse {
-            0% { background-color: #330000; }
-            100% { background-color: #550000; }
+            transition: background-color 0.1s ease;
         }
 
         .header-panel {
@@ -190,7 +185,7 @@
 </head>
 <body>
 
-    <!-- CHAOTIC POPUPS INSPIRATION -->
+    <!-- CHAOTIC POPUPS -->
     <div id="pop1" class="chaos-window" style="top: 15%; left: 10%;">[TRAUMA SUIT INTEGRITY COMPROMISED]</div>
     <div id="pop2" class="chaos-window" style="top: 70%; left: 75%;">YOU ARE AN ICHOR-INFECTED FOOL! HA HA!</div>
     <div id="pop3" class="chaos-window" style="top: 30%; left: 80%;">CRYORISED OPAL MELTING... CANNOT ESCAPE!</div>
@@ -200,17 +195,17 @@
     <div id="loginGate">
         <div class="portal-box">
             <div style="font-size: 28px; margin-bottom: 15px; color: #FF0000; font-weight: bold;">:(&nbsp;&nbsp;:(</div>
-            <div style="font-size: 16px; margin-bottom: 15px; color: #FF5555;">[ICHOR CORRUPTION MATRIX v6.66]</div>
+            <div style="font-size: 16px; margin-bottom: 15px; color: #FF5555;">[ICHOR CORRUPTION MATRIX v7.77]</div>
             <div style="font-size: 13px; margin-bottom: 10px; text-align: left; color: #FFAAAA;">ENTER AUTHORIZED SEEKER ID:</div>
             <input type="text" id="gateUsername" placeholder="e.g. Mneme_seeker">
-            <button onclick="enterChaosHell()">SURVIVE DUAL ATTACK VECTORS</button>
+            <button onclick="enterChaosHell()">SURVIVE THE FINAL PHASE</button>
             <div id="gateError" class="error-text"></div>
         </div>
     </div>
 
     <!-- ROOM MAIN INTERFACE -->
     <div class="header-panel">
-        <div class="system-title">CHAMBER_STATUS: SECTOR_ALPHA // DUAL-VECTOR PROTOCOL</div>
+        <div class="system-title">CHAMBER_STATUS: SECTOR_ALPHA // FINAL OVERLOAD PROTOCOL</div>
         <div class="user-hud">
             <span>SEEKER: <strong id="hudUser">---</strong></span>
             <span>TRAUMA SUIT: <strong id="hudSuit">---</strong></span>
@@ -224,7 +219,7 @@
     </div>
 
     <div class="controls-hint">
-        LORE DIRECTIVE: Survive <strong>45 seconds</strong> against 2 active random attack vectors simultaneously. Manifest the gateway upon completion.
+        DIRECTIVE: Survive <strong>45 seconds</strong>. The final 10 seconds unleash all 6 vectors simultaneously with a pulsing background flash!
     </div>
 
     <!-- Firebase SDK & Multiplayer Logic -->
@@ -344,10 +339,9 @@
             let trialWon = false;
             let exitDoor = { x: 410, y: 160, w: 80, h: 90, active: false };
 
-            // Attack rotation system
             let currentAttacks = [0, 1];
             let attackTimer = 0;
-            let attackDuration = 300; // Switch attacks every ~5 seconds (at 60fps)
+            let attackDuration = 300; 
             let globalAngle = 0;
 
             const keys = {};
@@ -411,15 +405,69 @@
             function pickTwoRandomAttacks() {
                 let first = Math.floor(Math.random() * 6);
                 let second = Math.floor(Math.random() * 5);
-                if (second >= first) second++; // Ensure two unique attacks
+                if (second >= first) second++;
                 return [first, second];
+            }
+
+            function triggerAttack(attackId) {
+                switch(attackId) {
+                    case 0:
+                        if (attackTimer % 6 === 0) {
+                            for (let i = 0; i < 3; i++) {
+                                let angle = globalAngle + (i * ((Math.PI * 2) / 3));
+                                bullets.push({ x: core.x, y: core.y, vx: Math.cos(angle) * 3, vy: Math.sin(angle) * 3, radius: 5 });
+                            }
+                        }
+                        break;
+                    case 1:
+                        if (attackTimer % 40 === 0) {
+                            let angleToPlayer = Math.atan2(player.y - core.y, player.x - core.x);
+                            bullets.push({ x: core.x, y: core.y, vx: Math.cos(angleToPlayer) * 5, vy: Math.sin(angleToPlayer) * 5, radius: 6 });
+                        }
+                        break;
+                    case 2:
+                        if (attackTimer % 12 === 0) {
+                            bullets.push({ x: Math.random() * canvas.width, y: 0, vx: 0, vy: 3.5, radius: 5 });
+                        }
+                        break;
+                    case 3:
+                        if (attackTimer % 25 === 0) {
+                            let sideY = Math.random() * canvas.height;
+                            bullets.push({ x: 0, y: sideY, vx: 4, vy: 0, radius: 5 });
+                            bullets.push({ x: canvas.width, y: sideY, vx: -4, vy: 0, radius: 5 });
+                        }
+                        break;
+                    case 4:
+                        if (attackTimer % 70 === 0) {
+                            let ringCount = 8;
+                            for (let i = 0; i < ringCount; i++) {
+                                let angle = i * ((Math.PI * 2) / ringCount);
+                                bullets.push({ x: core.x, y: core.y, vx: Math.cos(angle) * 2.5, vy: Math.sin(angle) * 2.5, radius: 6 });
+                            }
+                        }
+                        break;
+                    case 5:
+                        if (attackTimer % 15 === 0) {
+                            let randAngle = Math.random() * Math.PI * 2;
+                            bullets.push({ x: core.x, y: core.y, vx: Math.cos(randAngle) * 4, vy: Math.sin(randAngle) * 4, radius: 4 });
+                        }
+                        break;
+                }
             }
 
             function update() {
                 let elapsedTime = Date.now() - startTime;
+                let timeRemaining = survivalDuration - elapsedTime;
+
                 if (elapsedTime >= survivalDuration) {
                     trialWon = true;
                     exitDoor.active = true;
+                }
+
+                // Gentle eye-friendly red/black flash during the final 10 seconds
+                if (timeRemaining <= 10000 && !trialWon) {
+                    let flashTick = Math.floor(elapsedTime / 300) % 2;
+                    document.body.style.backgroundColor = flashTick === 0 ? "#420000" : "#1a0000";
                 }
 
                 let dx = 0;
@@ -446,57 +494,18 @@
                     globalAngle += 0.05;
                     attackTimer++;
 
-                    if (attackTimer >= attackDuration) {
-                        attackTimer = 0;
-                        currentAttacks = pickTwoRandomAttacks();
-                    }
-
-                    // Execute the 2 active attacks out of the 6 options
-                    currentAttacks.forEach(attackId => {
-                        switch(attackId) {
-                            case 0: // Attack 1: Spiral Wave
-                                if (attackTimer % 6 === 0) {
-                                    for (let i = 0; i < 3; i++) {
-                                        let angle = globalAngle + (i * ((Math.PI * 2) / 3));
-                                        bullets.push({ x: core.x, y: core.y, vx: Math.cos(angle) * 3, vy: Math.sin(angle) * 3, radius: 5 });
-                                    }
-                                }
-                                break;
-                            case 1: // Attack 2: Direct Player Sniper Burst
-                                if (attackTimer % 40 === 0) {
-                                    let angleToPlayer = Math.atan2(player.y - core.y, player.x - core.x);
-                                    bullets.push({ x: core.x, y: core.y, vx: Math.cos(angleToPlayer) * 5, vy: Math.sin(angleToPlayer) * 5, radius: 6 });
-                                }
-                                break;
-                            case 2: // Attack 3: Rain Downwards from ceiling
-                                if (attackTimer % 12 === 0) {
-                                    bullets.push({ x: Math.random() * canvas.width, y: 0, vx: 0, vy: 3.5, radius: 5 });
-                                }
-                                break;
-                            case 3: // Attack 4: Wall Sweep (Side lasers/bullets)
-                                if (attackTimer % 25 === 0) {
-                                    let sideY = Math.random() * canvas.height;
-                                    bullets.push({ x: 0, y: sideY, vx: 4, vy: 0, radius: 5 });
-                                    bullets.push({ x: canvas.width, y: sideY, vx: -4, vy: 0, radius: 5 });
-                                }
-                                break;
-                            case 4: // Attack 5: Expanding Ring Pulse
-                                if (attackTimer % 70 === 0) {
-                                    let ringCount = 8;
-                                    for (let i = 0; i < ringCount; i++) {
-                                        let angle = i * ((Math.PI * 2) / ringCount);
-                                        bullets.push({ x: core.x, y: core.y, vx: Math.cos(angle) * 2.5, vy: Math.sin(angle) * 2.5, radius: 6 });
-                                    }
-                                }
-                                break;
-                            case 5: // Attack 6: Random Scatter Shrapnel
-                                if (attackTimer % 15 === 0) {
-                                    let randAngle = Math.random() * Math.PI * 2;
-                                    bullets.push({ x: core.x, y: core.y, vx: Math.cos(randAngle) * 4, vy: Math.sin(randAngle) * 4, radius: 4 });
-                                }
-                                break;
+                    // Final 10 seconds: unleash all 6 attacks simultaneously
+                    if (timeRemaining <= 10000) {
+                        for (let i = 0; i < 6; i++) {
+                            triggerAttack(i);
                         }
-                    });
+                    } else {
+                        if (attackTimer >= attackDuration) {
+                            attackTimer = 0;
+                            currentAttacks = pickTwoRandomAttacks();
+                        }
+                        currentAttacks.forEach(attackId => triggerAttack(attackId));
+                    }
                 }
 
                 for (let i = bullets.length - 1; i >= 0; i--) {
@@ -551,10 +560,15 @@
                 ctx.lineWidth = 2;
                 ctx.strokeRect(230, 10, 440, 30);
 
-                ctx.fillStyle = trialWon ? "#FFFFFF" : "#FF5555";
-                ctx.font = "13px 'Courier New'";
+                let hudText = trialWon ? "VIRAL PROTOCOL PURGED: ENTER GATE" : `SURVIVE ICHOR: ${remainingSecs}s // HP: ${player.hp}`;
+                if (remainingSecs <= 10 && !trialWon) {
+                    hudText = `FINAL RUSH: ${remainingSecs}s // ALL 6 VECTORS // HP: ${player.hp}`;
+                }
+
+                ctx.fillStyle = remainingSecs <= 10 && !trialWon ? "#FFFF00" : (trialWon ? "#FFFFFF" : "#FF5555");
+                ctx.font = "12px 'Courier New'";
                 ctx.textAlign = "center";
-                ctx.fillText(trialWon ? "VIRAL PROTOCOL PURGED: ENTER GATE" : `SURVIVE ICHOR: ${remainingSecs}s // ACTIVE: [${currentAttacks.join(',')}] // HP: ${player.hp}`, 450, 29);
+                ctx.fillText(hudText, 450, 29);
 
                 // Viral Glitch Core
                 ctx.fillStyle = "#FF0000";
