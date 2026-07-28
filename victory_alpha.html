@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE_HUB // ERROR_404_VOID // ECHO_DETECTED</title>
+    <title>THE_HUB // ERROR_404_VOID // SURVIVAL_INTERFACE</title>
     <style>
         * {
             box-sizing: border-box;
@@ -21,12 +21,14 @@
             width: 100vw;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             cursor: crosshair;
+            padding: 20px;
+            transition: filter 0.1s ease, transform 0.1s ease;
         }
 
-        /* CRT Overlay */
+        /* CRT Scanline Overlay */
         .scanlines {
             position: absolute;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -36,139 +38,188 @@
             pointer-events: none;
         }
 
-        /* Fullscreen Canvas for Multiplayer Ghosts & Trails */
+        /* Ghost Canvas Layer */
         canvas {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            top: 0; left: 0; width: 100vw; height: 100vh;
             z-index: 1;
+            pointer-events: none;
         }
 
-        /* The Corrupted 404 Console */
-        .terminal-container {
+        /* 404 Header Area */
+        .header-area {
             position: relative;
             z-index: 10;
-            background: rgba(10, 0, 0, 0.85);
-            border: 2px solid #FF0000;
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(255, 0, 0, 0.2);
-            width: 80%;
-            max-width: 800px;
-            height: 60vh;
-            display: flex;
-            flex-direction: column;
-            padding: 2px;
-            animation: terminalShake 0.1s infinite alternate;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 15px;
         }
-
-        @keyframes terminalShake {
-            0% { transform: translate(1px, 0); }
-            100% { transform: translate(-1px, 1px); }
-        }
-
-        .terminal-header {
-            background: #FF0000;
-            color: #000000;
-            padding: 5px 15px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            letter-spacing: 2px;
-        }
-
-        .terminal-body {
-            flex-grow: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        /* Hide scrollbar */
-        .terminal-body::-webkit-scrollbar { display: none; }
 
         .error-code {
-            font-size: 72px;
+            font-size: 64px;
             font-weight: bold;
-            text-align: center;
             text-shadow: 4px 4px #000, -2px -2px #FF0055;
             animation: glitchText 2s infinite;
-            margin-bottom: 20px;
         }
 
         @keyframes glitchText {
             0%, 100% { transform: skew(0deg); }
-            5%, 15% { transform: skew(10deg); filter: drop-shadow(-5px 0 0 cyan); }
-            10%, 20% { transform: skew(-10deg); filter: drop-shadow(5px 0 0 red); }
+            5%, 15% { transform: skew(8deg); filter: drop-shadow(-5px 0 0 cyan); }
+            10%, 20% { transform: skew(-8deg); filter: drop-shadow(5px 0 0 red); }
             25%, 95% { transform: skew(0deg); filter: none; }
         }
 
-        .log-line {
-            font-size: 14px;
-            line-height: 1.2;
-            opacity: 0.8;
-            word-wrap: break-word;
+        /* Main Workspace split: Terminal left, Comms right */
+        .workspace {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            width: 100%;
+            height: 70vh;
+            gap: 20px;
+            max-width: 1400px;
         }
 
-        .log-highlight { color: #FFFFFF; font-weight: bold; background: #FF0000; padding: 0 5px; }
-
-        .back-btn {
-            background: transparent;
-            color: #FF3333;
-            border: 2px dashed #FF3333;
-            padding: 15px;
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            text-align: center;
-            margin-top: auto;
-            transition: all 0.2s;
-            text-transform: uppercase;
+        /* Interactive Terminal Console */
+        .terminal-container {
+            flex: 2;
+            background: rgba(10, 0, 0, 0.9);
+            border: 2px solid #FF0000;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
         }
 
-        .back-btn:hover {
+        .panel-header {
             background: #FF0000;
             color: #000000;
-            box-shadow: 0 0 20px #FF0000;
+            padding: 5px 15px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
         }
 
-        /* Login Gate Overlay */
-        #loginGate {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #110000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 1000; padding: 20px;
+        .terminal-output {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
+        .terminal-output::-webkit-scrollbar { display: none; }
 
-        .portal-box {
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #FF0000;
-            padding: 30px;
-            max-width: 500px; width: 100%;
-            text-align: center;
-        }
-
-        input[type="text"] {
-            background: transparent;
-            border: 1px solid #FF3333;
-            color: #FF3333;
+        .input-line {
+            display: flex;
+            background: rgba(20, 0, 0, 1);
+            border-top: 1px solid #FF3333;
             padding: 10px;
+            align-items: center;
+        }
+
+        .prompt-symbol {
+            color: #FF0000;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        #termInput {
+            background: transparent;
+            border: none;
+            color: #FFFFFF;
             font-family: 'Courier New', Courier, monospace;
             font-size: 16px;
             width: 100%;
             outline: none;
-            margin-bottom: 15px;
         }
 
-        .login-btn {
-            background: #FF0000; color: #000; border: none; padding: 10px 20px;
-            font-family: 'Courier New', Courier, monospace; font-weight: bold; cursor: pointer;
+        /* Comms Feed Panel */
+        .comms-container {
+            flex: 1;
+            background: rgba(15, 0, 0, 0.85);
+            border: 2px solid #FF3333;
+            box-shadow: 0 0 20px rgba(255, 50, 50, 0.2);
+            display: flex;
+            flex-direction: column;
         }
-        .error-text { color: #FFAAAA; margin-top: 10px; font-size: 14px; }
+
+        .comms-feed {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .comms-feed::-webkit-scrollbar { display: none; }
+
+        .comms-msg {
+            border-left: 3px solid #FF3333;
+            padding-left: 8px;
+            line-height: 1.3;
+        }
+        .comms-alert {
+            border-left: 3px solid #FFFFFF;
+            color: #FFFFFF;
+            background: rgba(255,0,0,0.3);
+            padding: 4px 8px;
+            animation: flashAlert 0.5s infinite alternate;
+        }
+
+        @keyframes flashAlert { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* JUMP SCARE CONTAINER */
+        #jumpScareOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000;
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            color: #FFFFFF;
+        }
+
+        .scare-face {
+            font-size: 15vw;
+            font-weight: bold;
+            color: #FF0000;
+            text-shadow: 0 0 50px #FF0000, 0 0 100px #000;
+            transform: scale(0.5);
+            animation: scareZoom 0.2s forwards ease-in-out;
+        }
+
+        @keyframes scareZoom {
+            100% { transform: scale(1.6) rotate(5deg); filter: blur(2px) invert(100%); }
+        }
+
+        /* Login Screen Overlay */
+        #loginGate {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #0e0000;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+        .portal-box {
+            background: #000; border: 2px solid #FF0000; padding: 35px; width: 450px; text-align: center;
+            box-shadow: 0 0 30px rgba(255,0,0,0.5);
+        }
+        input[type="text"] {
+            background: transparent; border: 1px solid #FF3333; color: #FF3333; padding: 10px;
+            font-family: 'Courier New', Courier, monospace; font-size: 16px; width: 100%; outline: none; margin-bottom: 15px;
+        }
+        .btn {
+            background: #FF0000; color: #000; border: none; padding: 10px 20px; font-weight: bold;
+            font-family: 'Courier New', Courier, monospace; cursor: pointer; width: 100%; text-transform: uppercase;
+        }
+        .btn:hover { background: #FFFFFF; box-shadow: 0 0 15px #FF0000; }
+        .error-text { color: #FF8888; margin-top: 10px; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -176,120 +227,266 @@
     <div class="scanlines"></div>
     <canvas id="voidCanvas"></canvas>
 
-    <!-- LOGIN GATE OVERLAY -->
+    <div id="jumpScareOverlay">
+        <div class="scare-face" id="scareFace">Ø_Ø</div>
+    </div>
+
     <div id="loginGate">
         <div class="portal-box">
-            <div style="font-size: 32px; margin-bottom: 15px; color: #FF0000;">404</div>
-            <div style="font-size: 18px; margin-bottom: 20px;">[SECTOR_ALPHA_GATEWAY_LOST]</div>
-            <div style="font-size: 14px; margin-bottom: 10px; text-align: left;">IDENTIFY SIGNAL TO ENTER THE VOID:</div>
-            <input type="text" id="gateUsername" placeholder="e.g. Mneme_seeker">
-            <button class="login-btn" onclick="enterVoid()">BROADCAST SIGNAL</button>
+            <div style="font-size: 36px; margin-bottom: 10px; color: #FF0000; font-weight: bold;">[404_VOID]</div>
+            <div style="font-size: 13px; margin-bottom: 25px; color: #FFAAAA;">CRITICAL IMMERSION TERMINAL // IDENTITY CHECK</div>
+            <input type="text" id="gateUsername" placeholder="Enter Seeker ID (e.g. Mneme_seeker)">
+            <button class="btn" onclick="enterVoid()">Establish Node Link</button>
             <div id="gateError" class="error-text"></div>
         </div>
     </div>
 
-    <!-- MAIN TERMINAL -->
-    <div class="terminal-container" id="terminal" style="display: none;">
-        <div class="terminal-header">
-            <span>KERNEL_PANIC // SECTOR_ALPHA</span>
-            <span id="activeUserDisplay">USER: UNKNOWN</span>
-        </div>
-        <div class="terminal-body" id="logContainer">
-            <div class="error-code">404</div>
-            <div style="text-align: center; margin-bottom: 20px; color: #FFAAAA;">
-                ROUTING INDEX DESTABILIZED. THE ICHOR STREAM HAS DISSOLVED THIS SECTOR.
-            </div>
-            <!-- Logs will spawn here -->
-        </div>
-        <button class="back-btn" onclick="window.location.href='index.html'">ABORT // RETURN TO HUB MAINFRAME</button>
+    <div class="header-area">
+        <div class="error-code">404</div>
+        <div style="font-size: 12px; color: #FFAAAA; letter-spacing: 4px;">SECTOR_ALPHA_FABRIC_LIQUEFIED</div>
     </div>
 
-    <!-- Firebase SDK & Logic -->
+    <div class="workspace">
+        <div class="terminal-container">
+            <div class="panel-header">
+                <span>SYSTEM_SHELL // COMMAND_PROMPT</span>
+                <span id="shieldDisplay">SHIELDS: 100%</span>
+            </div>
+            <div class="terminal-output" id="termOutput">
+                <div>Type <span style="color:#FFF;">help</span> to initialize command directory lists.</div>
+                <div>Status: Awaiting environment stabilization sequences...</div>
+            </div>
+            <div class="input-line">
+                <span class="prompt-symbol">&gt;</span>
+                <input type="text" id="termInput" autocomplete="off" disabled>
+            </div>
+        </div>
+
+        <div class="comms-container">
+            <div class="panel-header">>> BROADCAST_INTELLIGENCE</div>
+            <div class="comms-feed" id="commsFeed">
+                <div class="comms-msg">[SYSTEM]: Comms synchronized with dynamic void variables.</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn" style="max-width:1400px; margin-top:15px; background:transparent; color:#FF3333; border:1px dashed #FF3333;" onclick="window.location.href='index.html'">ABORT TERMINAL MATRIX</button>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBlgsx3uuat9oi2vwntXhInUcAe8N-veLY",
             authDomain: "enter-f1c88.firebaseapp.com",
             projectId: "enter-f1c88",
             storageBucket: "enter-f1c88.appspot.com",
             messagingSenderId: "794692963928",
-            appId: "1:794692963928:web:83fed114aed9389bf3042d",
-            measurementId: "G-PFGVSW5598"
+            appId: "1:794692963928:web:83fed114aed9389bf3042d"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const validUsers = [
-            "Mneme_seeker", "Mirror_seeker", "Written_seeker", 
-            "Faded_seeker", "Dule_Seeker", "Old_seeker", 
-            "Strong_seeker", "Weaveshaper_seeker", "Fabled_seeker",
-            "Prince_seeker"
-        ];
-
+        const validUsers = ["Mneme_seeker", "Mirror_seeker", "Written_seeker", "Faded_seeker", "Dule_Seeker", "Old_seeker", "Strong_seeker", "Weaveshaper_seeker", "Fabled_seeker", "Prince_seeker"];
         let activeUser = "";
-        
+        let shields = 100;
+        let anomalyActive = false;
+        let corruptionLevel = 10;
+
+        const termInput = document.getElementById('termInput');
+        const termOutput = document.getElementById('termOutput');
+        const commsFeed = document.getElementById('commsFeed');
+
         window.enterVoid = function() {
             const inputVal = document.getElementById('gateUsername').value.trim();
             const errorDiv = document.getElementById('gateError');
             const matchedUser = validUsers.find(u => u.toLowerCase() === inputVal.toLowerCase());
 
             if (!matchedUser) {
-                errorDiv.textContent = "FATAL: Unrecognized Seeker ID. Cannot establish ghost connection.";
+                errorDiv.textContent = "DECREE DENIED: Identity signature mismatch. Void bypass unachievable.";
                 return;
             }
 
             activeUser = matchedUser;
-            document.getElementById('activeUserDisplay').textContent = `USER: ${activeUser}`;
             document.getElementById('loginGate').style.display = 'none';
-            document.getElementById('terminal').style.display = 'flex';
-            
+            termInput.disabled = false;
+            termInput.focus();
+
             initMultiplayer();
-            startKernelLogs();
+            startEventLoops();
         }
 
         // ==========================================
-        // KERNEL PANIC LOG GENERATOR
+        // COMMAND CONTROLLER
         // ==========================================
-        const logLines = [
-            "Attempting to rebuild Alpha architecture... [FAILED]",
-            "Warning: Ichor saturation at 114%. Hull breach imminent.",
-            "Trauma Suit telemetry lost. Searching for biological feedback...",
-            "Orphaned bullet entities detected in memory matrix.",
-            "Sub-routing to Door 3... [CONNECTION TIMEOUT]",
-            "ERROR 0x000000FE: Pointer refers to deleted human memory.",
-            "Purging corrupted Opal data from cache...",
-            "Listening for echoes of past Seekers in the void..."
-        ];
+        termInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const cmd = this.value.trim().toLowerCase();
+                this.value = "";
+                if(!cmd) return;
 
-        const logContainer = document.getElementById('logContainer');
+                printLog(`&gt; ${cmd}`, '#FFFFFF');
+                processCommand(cmd);
+            }
+        });
 
-        function startKernelLogs() {
+        function printLog(text, color = '#FF3333') {
+            const line = document.createElement('div');
+            line.innerHTML = text;
+            line.style.color = color;
+            termOutput.appendChild(line);
+            termOutput.scrollTop = termOutput.scrollHeight;
+        }
+
+        function pushComms(text, isAlert = false) {
+            const msg = document.createElement('div');
+            msg.className = isAlert ? 'comms-msg comms-alert' : 'comms-msg';
+            msg.textContent = text;
+            commsFeed.appendChild(msg);
+            commsFeed.scrollTop = commsFeed.scrollHeight;
+        }
+
+        function processCommand(cmd) {
+            switch(cmd) {
+                case 'help':
+                    printLog("AVAILABLE SYSTEM PROTOCOLS:", '#FFAAAA');
+                    printLog(" - <span style='color:#FFF;'>status</span>: Inspect local core metrics.");
+                    printLog(" - <span style='color:#FFF;'>fortify</span>: Run shell calculations to stabilize shields (+25%).");
+                    printLog(" - <span style='color:#FFF;'>purge</span>: Flash internal log cache to flush local disturbances.");
+                    printLog(" - <span style='color:#FFF;'>probe</span>: Force-ping surrounding multiplayer void space nodes.");
+                    printLog(" - <span style='color:#FFF;'>override_404</span>: Dangerous. Forces entry to restricted sector levels.");
+                    break;
+                case 'status':
+                    printLog(`USER NODE: ${activeUser}`);
+                    printLog(`SHIELD PROTECTION VALUE: ${shields}%`);
+                    printLog(`ENVIRONMENTAL CORRUPTION COEFFICIENT: ${corruptionLevel}%`);
+                    break;
+                case 'fortify':
+                    if (shields >= 100) {
+                        printLog("Shields already operating at max containment thresholds.");
+                    } else {
+                        shields = Math.min(100, shields + 25);
+                        document.getElementById('shieldDisplay').textContent = `SHIELDS: ${shields}%`;
+                        printLog("Shield arrays reinforced. Visual cohesion metrics improving.", '#00FFCC');
+                        pushComms(`[COMMS]: Seeker ${activeUser} initialized stabilization protocols.`);
+                    }
+                    break;
+                case 'purge':
+                    printLog("Purging environment variables...", '#FFCC00');
+                    if (anomalyActive) {
+                        anomalyActive = false;
+                        document.body.style.filter = "none";
+                        document.body.style.transform = "none";
+                        printLog("Local structural anomaly successfully collapsed.", '#00FFCC');
+                        pushComms("[COMMS]: Spatial disturbance purged by local user command.");
+                    } else {
+                        printLog("No active anomaly traces detected in local buffer arrays.");
+                    }
+                    break;
+                case 'probe':
+                    printLog("Broadcasting wide-band sub-space ping...", '#FF00FF');
+                    pushComms(`[ALERT]: Probe array launched by ${activeUser}. Tracking spatial ghosts.`);
+                    triggerRandomEvent(0.8; // High chance to force a trippy encounter
+                    break;
+                case 'override_404':
+                    printLog("CRITICAL EXCEPTION: Attempting raw root authentication down deep vectors...", '#FF0000');
+                    setTimeout(() => { triggerJumpScare(); }, 1500);
+                    break;
+                default:
+                    printLog(`Command execution failure: '${cmd}' is unrecognized by the Hub fallback matrix.`, '#FF8888');
+            }
+        }
+
+        // ==========================================
+        // DYNAMIC & SCRIPTED INCIDENTS
+        // ==========================================
+        function startEventLoops() {
+            // Check for random chaotic events every 12 seconds
             setInterval(() => {
-                const el = document.createElement('div');
-                el.className = 'log-line';
-                
-                // 10% chance for a severe highlight glitch
-                if (Math.random() < 0.1) {
-                    el.innerHTML = `[CRITICAL] <span class="log-highlight">SYSTEM DELETION AVOIDED</span>`;
-                } else {
-                    el.textContent = `> ${logLines[Math.floor(Math.random() * logLines.length)]} [${Date.now()}]`;
+                if (Math.random() < 0.4) {
+                    triggerRandomEvent(Math.random());
                 }
+            }, 12000);
 
-                logContainer.insertBefore(el, logContainer.children[2]); // Insert below the 404 header
-                
-                // Keep DOM clean
-                if (logContainer.children.length > 15) {
-                    logContainer.removeChild(logContainer.lastChild);
+            // Steadily build stress over time
+            setInterval(() => {
+                corruptionLevel = Math.min(100, corruptionLevel + 2);
+                if (corruptionLevel >= 75 && Math.random() < 0.3) {
+                    pushComms("[WARNING]: System corruption levels are entering extreme variance limits!", true);
                 }
-            }, 800);
+                if (corruptionLevel >= 100) {
+                    triggerJumpScare();
+                }
+            }, 5000);
+        }
+
+        function triggerRandomEvent(roll) {
+            anomalyActive = true;
+            
+            if (roll < 0.25) {
+                // Event 1: Inversion Spike
+                document.body.style.filter = "invert(100%) hue-rotate(180deg)";
+                printLog("!! INVERSION SPIKE DETECTED !! Use 'purge' to restore vision matrices!", '#FF0000');
+                pushComms("[COMMS]: Optical framework phase shift observed in localized zone.", true);
+                damageShields(15);
+            } else if (roll < 0.50) {
+                // Event 2: Spatial Distortion Matrix
+                document.body.style.transform = "scale(0.95) rotate(2deg)";
+                document.body.style.filter = "blur(2px) contrast(200%)";
+                printLog("!! SPATIAL COMPRESSION INCIDENT !! Reality anchor slipping. Use 'purge'!", '#FF0000');
+                pushComms("[COMMS]: Local grid coordinates buckling under structural load.", true);
+                damageShields(20);
+            } else if (roll < 0.75) {
+                // Event 3: Comms Static Overwhelm
+                pushComms("[UNRECOGNIZED SIGNAL]: I can feel the leather of the suit turning to skin...", true);
+                pushComms("[UNRECOGNIZED SIGNAL]: HELP ME METER THE TIDE", true);
+                printLog("Intrusive frequencies detected flooding the feed buffer registers.", '#FFCC00');
+                damageShields(10);
+            } else {
+                // Event 4: Ghost Encounter Echo
+                printLog("A phantom data packet has briefly attached to your cursor path.", '#FF00FF');
+                pushComms("[COMMS]: Transient presence detected tracking nearby user telemetry lines.");
+            }
+        }
+
+        function damageShields(amt) {
+            shields = Math.max(0, shields - amt);
+            document.getElementById('shieldDisplay').textContent = `SHIELDS: ${shields}%`;
+            if (shields <= 0) {
+                printLog("CRITICAL OUTAGE: SYSTEM CONTAINMENT DEAD.", '#FF0000');
+                setTimeout(() => { triggerJumpScare(); }, 1000);
+            }
         }
 
         // ==========================================
-        // MULTIPLAYER GHOST CANVAS
+        // CRITICAL SYSTEM JUMP SCARE EFFECT
+        // ==========================================
+        function triggerJumpScare() {
+            const overlay = document.getElementById('jumpScareOverlay');
+            const face = document.getElementById('scareFace');
+            overlay.style.display = 'flex';
+
+            // String of horrific system symbols morphing quickly
+            const faces = ["Ø_Ø", "☠_☠", "4_0_4", "ERR_VOID", "F_L_E_S_H"];
+            let idx = 0;
+            const faceInterval = setInterval(() => {
+                face.textContent = faces[idx % faces.length];
+                document.body.style.filter = Math.random() > 0.5 ? "invert(100%)" : "none";
+                idx++;
+            }, 40);
+
+            setTimeout(() => {
+                clearInterval(faceInterval);
+                overlay.innerHTML = "<div style='font-size:20px; text-align:center;'>CORE ASSIMILATION COMPLETE.<br>CONNECTION TERMINATED.</div>";
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 2000);
+            }, 1800);
+        }
+
+        // ==========================================
+        // MULTIPLAYER GHOST RENDERING
         // ==========================================
         const canvas = document.getElementById('voidCanvas');
         const ctx = canvas.getContext('2d');
@@ -304,109 +501,56 @@
 
         let mouseX = width / 2;
         let mouseY = height / 2;
-        let otherPlayers = {}; 
-        let mouseTrails = [];
+        let otherPlayers = {};
 
-        // Track local mouse
         window.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
-
-            // Add to local trail
-            mouseTrails.push({ x: mouseX, y: mouseY, alpha: 1 });
-            if (mouseTrails.length > 20) mouseTrails.shift();
         });
 
-        // Firebase Sync
         function initMultiplayer() {
-            // 1. Listen for other players in the void
             onSnapshot(doc(db, "alpha_void", "ghosts"), (docSnap) => {
                 if (docSnap.exists()) {
                     otherPlayers = docSnap.data();
                 }
             });
 
-            // 2. Broadcast local player position (throttled to save writes)
             setInterval(() => {
                 if (!activeUser) return;
-                
-                // Normalize coordinates so they work across different screen resolutions
-                const normX = mouseX / width;
-                const normY = mouseY / height;
-
                 setDoc(doc(db, "alpha_void", "ghosts"), {
                     [activeUser]: {
-                        x: normX,
-                        y: normY,
+                        x: mouseX / width,
+                        y: mouseY / height,
                         timestamp: Date.now()
                     }
                 }, { merge: true });
-
-            }, 150); // Broadcast every 150ms
+            }, 200);
         }
 
-        // Render Loop
         function drawVoid() {
-            // Clear with slight fade for trailing effects
-            ctx.fillStyle = 'rgba(5, 0, 0, 0.3)';
+            ctx.fillStyle = 'rgba(5, 0, 0, 0.2)';
             ctx.fillRect(0, 0, width, height);
 
-            // Draw Local Mouse Trail (Digital tear effect)
-            ctx.beginPath();
-            for (let i = 0; i < mouseTrails.length; i++) {
-                const pt = mouseTrails[i];
-                ctx.strokeStyle = `rgba(255, 0, 0, ${pt.alpha})`;
-                ctx.lineWidth = i * 0.5;
-                if (i === 0) ctx.moveTo(pt.x, pt.y);
-                else ctx.lineTo(pt.x, pt.y);
-                
-                // Random glitch spike in the trail
-                if (Math.random() > 0.8) {
-                    ctx.lineTo(pt.x + (Math.random()-0.5)*50, pt.y + (Math.random()-0.5)*50);
-                }
-                
-                pt.alpha -= 0.05;
-            }
-            ctx.stroke();
-
-            // Render Multiplayer Ghosts
             const now = Date.now();
             for (const [user, data] of Object.entries(otherPlayers)) {
-                if (user === activeUser) continue; // Don't draw self
+                if (user === activeUser) continue;
 
-                // Only draw players who updated within the last 5 seconds (active)
-                if (now - data.timestamp < 5000) {
-                    // Convert normalized coordinates back to screen space
+                if (now - data.timestamp < 4000) {
                     const drawX = data.x * width;
                     const drawY = data.y * height;
 
-                    // Draw the Ghost Orb
                     ctx.beginPath();
-                    ctx.arc(drawX, drawY, 8 + Math.random() * 4, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(255, 50, 50, ${0.5 + Math.random() * 0.5})`;
+                    ctx.arc(drawX, drawY, 6 + Math.random()*5, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 0, 0, ${0.4 + Math.random()*0.4})`;
                     ctx.fill();
 
-                    // Glitch box around them
-                    if (Math.random() > 0.5) {
-                        ctx.strokeStyle = '#FF0055';
-                        ctx.lineWidth = 1;
-                        ctx.strokeRect(drawX - 15, drawY - 15, 30, 30);
-                    }
-
-                    // Draw Seeker ID Label
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.font = "12px 'Courier New'";
-                    ctx.textAlign = 'center';
-                    // Text flickers occasionally
-                    if (Math.random() > 0.1) {
-                        ctx.fillText(`[ECHO: ${user}]`, drawX, drawY - 20);
-                    }
+                    ctx.fillStyle = '#FF5555';
+                    ctx.font = "10px 'Courier New'";
+                    ctx.fillText(`[GHOST: ${user}]`, drawX - 30, drawY - 15);
                 }
             }
-
             requestAnimationFrame(drawVoid);
         }
-
         drawVoid();
     </script>
 </body>
