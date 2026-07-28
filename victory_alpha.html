@@ -369,7 +369,7 @@
             pushComms(`[WARNING]: ${type.name} imminent. Local reality failing.`, 'alert');
 
             // 8 second window to fix
-            anomalyTimeout = setTimeout(() => { failAnomaly(); }, 8000);
+            anomalyTimeout = setTimeout(() => { failAnomaly(); }, 80000);
         }
 
         function resolveAnomaly() {
