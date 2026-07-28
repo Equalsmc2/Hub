@@ -5,60 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>THE_HUB // ERROR_404_VOID // SURVIVAL_INTERFACE</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-            overflow: hidden;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; overflow: hidden; }
 
         body {
-            background-color: #050000;
-            color: #FF3333;
-            font-family: 'Courier New', Courier, monospace;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            cursor: crosshair;
-            padding: 20px;
+            background-color: #050000; color: #FF3333; font-family: 'Courier New', Courier, monospace;
+            height: 100vh; width: 100vw; display: flex; flex-direction: column;
+            justify-content: flex-start; align-items: center; cursor: crosshair; padding: 20px;
             transition: filter 0.1s ease, transform 0.1s ease;
         }
 
-        /* CRT Scanline Overlay */
         .scanlines {
-            position: absolute;
-            top: 0; left: 0; width: 100vw; height: 100vh;
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(255, 0, 0, 0.05) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 4px, 3px 100%;
-            z-index: 100;
-            pointer-events: none;
+            background-size: 100% 4px, 3px 100%; z-index: 100; pointer-events: none;
         }
 
-        /* Ghost Canvas Layer */
-        canvas {
-            position: absolute;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 1;
-            pointer-events: none;
-        }
+        canvas { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none; }
 
-        /* 404 Header Area */
-        .header-area {
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            text-align: center;
-            margin-bottom: 15px;
-        }
+        .header-area { position: relative; z-index: 10; width: 100%; text-align: center; margin-bottom: 15px; }
 
         .error-code {
-            font-size: 64px;
-            font-weight: bold;
-            text-shadow: 4px 4px #000, -2px -2px #FF0055;
+            font-size: 64px; font-weight: bold; text-shadow: 4px 4px #000, -2px -2px #FF0055;
             animation: glitchText 2s infinite;
         }
 
@@ -69,157 +36,41 @@
             25%, 95% { transform: skew(0deg); filter: none; }
         }
 
-        /* Main Workspace split: Terminal left, Comms right */
-        .workspace {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            width: 100%;
-            height: 70vh;
-            gap: 20px;
-            max-width: 1400px;
-        }
+        .workspace { position: relative; z-index: 10; display: flex; width: 100%; height: 70vh; gap: 20px; max-width: 1400px; }
 
-        /* Interactive Terminal Console */
-        .terminal-container {
-            flex: 2;
-            background: rgba(10, 0, 0, 0.9);
-            border: 2px solid #FF0000;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .panel-header {
-            background: #FF0000;
-            color: #000000;
-            padding: 5px 15px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .terminal-output {
-            flex-grow: 1;
-            padding: 15px;
-            overflow-y: auto;
-            font-size: 14px;
-            line-height: 1.4;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
+        .terminal-container { flex: 2; background: rgba(10, 0, 0, 0.9); border: 2px solid #FF0000; box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); display: flex; flex-direction: column; }
+        
+        .panel-header { background: #FF0000; color: #000000; padding: 5px 15px; font-weight: bold; letter-spacing: 2px; font-size: 14px; display: flex; justify-content: space-between; }
+        
+        .terminal-output { flex-grow: 1; padding: 15px; overflow-y: auto; font-size: 14px; line-height: 1.4; display: flex; flex-direction: column; gap: 5px; }
         .terminal-output::-webkit-scrollbar { display: none; }
 
-        .input-line {
-            display: flex;
-            background: rgba(20, 0, 0, 1);
-            border-top: 1px solid #FF3333;
-            padding: 10px;
-            align-items: center;
-        }
+        .input-line { display: flex; background: rgba(20, 0, 0, 1); border-top: 1px solid #FF3333; padding: 10px; align-items: center; }
+        .prompt-symbol { color: #FF0000; font-weight: bold; margin-right: 10px; }
+        #termInput { background: transparent; border: none; color: #FFFFFF; font-family: 'Courier New', Courier, monospace; font-size: 16px; width: 100%; outline: none; text-transform: lowercase; }
 
-        .prompt-symbol {
-            color: #FF0000;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        #termInput {
-            background: transparent;
-            border: none;
-            color: #FFFFFF;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 16px;
-            width: 100%;
-            outline: none;
-        }
-
-        /* Comms Feed Panel */
-        .comms-container {
-            flex: 1;
-            background: rgba(15, 0, 0, 0.85);
-            border: 2px solid #FF3333;
-            box-shadow: 0 0 20px rgba(255, 50, 50, 0.2);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .comms-feed {
-            flex-grow: 1;
-            padding: 15px;
-            overflow-y: auto;
-            font-size: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        .comms-container { flex: 1; background: rgba(15, 0, 0, 0.85); border: 2px solid #FF3333; box-shadow: 0 0 20px rgba(255, 50, 50, 0.2); display: flex; flex-direction: column; }
+        .comms-feed { flex-grow: 1; padding: 15px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 10px; }
         .comms-feed::-webkit-scrollbar { display: none; }
-
-        .comms-msg {
-            border-left: 3px solid #FF3333;
-            padding-left: 8px;
-            line-height: 1.3;
-        }
-        .comms-alert {
-            border-left: 3px solid #FFFFFF;
-            color: #FFFFFF;
-            background: rgba(255,0,0,0.3);
-            padding: 4px 8px;
-            animation: flashAlert 0.5s infinite alternate;
-        }
+        .comms-msg { border-left: 3px solid #FF3333; padding-left: 8px; line-height: 1.3; }
+        .comms-alert { border-left: 3px solid #FFFFFF; color: #FFFFFF; background: rgba(255,0,0,0.3); padding: 4px 8px; animation: flashAlert 0.5s infinite alternate; }
+        .comms-story { border-left: 3px solid #00FFCC; color: #00FFCC; background: rgba(0,255,200,0.1); padding: 4px 8px; }
 
         @keyframes flashAlert { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        /* JUMP SCARE CONTAINER */
-        #jumpScareOverlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000;
-            z-index: 9999;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            color: #FFFFFF;
-        }
+        #jumpScareOverlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; display: none; justify-content: center; align-items: center; color: #FFFFFF; flex-direction: column; }
+        .scare-face { font-size: 15vw; font-weight: bold; color: #FF0000; text-shadow: 0 0 50px #FF0000, 0 0 100px #000; transform: scale(0.5); animation: scareZoom 0.2s forwards ease-in-out; }
 
-        .scare-face {
-            font-size: 15vw;
-            font-weight: bold;
-            color: #FF0000;
-            text-shadow: 0 0 50px #FF0000, 0 0 100px #000;
-            transform: scale(0.5);
-            animation: scareZoom 0.2s forwards ease-in-out;
-        }
+        @keyframes scareZoom { 100% { transform: scale(1.6) rotate(5deg); filter: blur(2px) invert(100%); } }
 
-        @keyframes scareZoom {
-            100% { transform: scale(1.6) rotate(5deg); filter: blur(2px) invert(100%); }
-        }
-
-        /* Login Screen Overlay */
-        #loginGate {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #0e0000;
-            display: flex; justify-content: center; align-items: center;
-            z-index: 1000;
-        }
-        .portal-box {
-            background: #000; border: 2px solid #FF0000; padding: 35px; width: 450px; text-align: center;
-            box-shadow: 0 0 30px rgba(255,0,0,0.5);
-        }
-        input[type="text"] {
-            background: transparent; border: 1px solid #FF3333; color: #FF3333; padding: 10px;
-            font-family: 'Courier New', Courier, monospace; font-size: 16px; width: 100%; outline: none; margin-bottom: 15px;
-        }
-        .btn {
-            background: #FF0000; color: #000; border: none; padding: 10px 20px; font-weight: bold;
-            font-family: 'Courier New', Courier, monospace; cursor: pointer; width: 100%; text-transform: uppercase;
-        }
+        #loginGate { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #0e0000; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .portal-box { background: #000; border: 2px solid #FF0000; padding: 35px; width: 450px; text-align: center; box-shadow: 0 0 30px rgba(255,0,0,0.5); }
+        input[type="text"] { background: transparent; border: 1px solid #FF3333; color: #FF3333; padding: 10px; font-family: 'Courier New', Courier, monospace; font-size: 16px; width: 100%; outline: none; margin-bottom: 15px; }
+        .btn { background: #FF0000; color: #000; border: none; padding: 10px 20px; font-weight: bold; font-family: 'Courier New', Courier, monospace; cursor: pointer; width: 100%; text-transform: uppercase; }
         .btn:hover { background: #FFFFFF; box-shadow: 0 0 15px #FF0000; }
         .error-text { color: #FF8888; margin-top: 10px; font-size: 13px; }
+        
+        #statsDisplay { font-weight: bold; font-size: 13px; word-spacing: 5px; }
     </style>
 </head>
 <body>
@@ -227,12 +78,11 @@
     <div class="scanlines"></div>
     <canvas id="voidCanvas"></canvas>
 
-    <!-- JUMP SCARE ASSET LAYER -->
     <div id="jumpScareOverlay">
         <div class="scare-face" id="scareFace">Ø_Ø</div>
+        <div id="endMessage" style="font-size: 24px; text-align: center; margin-top: 20px; display: none; z-index: 10;"></div>
     </div>
 
-    <!-- ENTRY MATRIX -->
     <div id="loginGate">
         <div class="portal-box">
             <div style="font-size: 36px; margin-bottom: 10px; color: #FF0000; font-weight: bold;">[404_VOID]</div>
@@ -243,18 +93,16 @@
         </div>
     </div>
 
-    <!-- MAIN DASHBOARD -->
     <div class="header-area">
         <div class="error-code">404</div>
         <div style="font-size: 12px; color: #FFAAAA; letter-spacing: 4px;">SECTOR_ALPHA_FABRIC_LIQUEFIED</div>
     </div>
 
     <div class="workspace">
-        <!-- Live Terminal System -->
         <div class="terminal-container">
             <div class="panel-header">
                 <span>SYSTEM_SHELL // COMMAND_PROMPT</span>
-                <span id="shieldDisplay">SHIELDS: 100%</span>
+                <span id="statsDisplay">SHLD: 100/100 | NRG: 100% | DATA: 0% | CRPT: 0%</span>
             </div>
             <div class="terminal-output" id="termOutput">
                 <div>Type <span style="color:#FFF;">help</span> to initialize command directory lists.</div>
@@ -266,7 +114,6 @@
             </div>
         </div>
 
-        <!-- Dynamic Comms Unit -->
         <div class="comms-container">
             <div class="panel-header">>> BROADCAST_INTELLIGENCE</div>
             <div class="comms-feed" id="commsFeed">
@@ -275,42 +122,35 @@
         </div>
     </div>
 
-    <button class="btn" style="max-width:1400px; margin-top:15px; background:transparent; color:#FF3333; border:1px dashed #FF3333;" onclick="window.location.href='index.html'">ABORT TERMINAL MATRIX</button>
+    <button class="btn" style="max-width:1400px; margin-top:15px; background:transparent; color:#FF3333; border:1px dashed #FF3333;" onclick="window.location.reload()">REBOOT TERMINAL MATRIX</button>
 
-    <!-- Script Architecture -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBlgsx3uuat9oi2vwntXhInUcAe8N-veLY",
-            authDomain: "enter-f1c88.firebaseapp.com",
-            projectId: "enter-f1c88",
-            storageBucket: "enter-f1c88.appspot.com",
-            messagingSenderId: "794692963928",
-            appId: "1:794692963928:web:83fed114aed9389bf3042d"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
+    <script>
         const validUsers = ["Mneme_seeker", "Mirror_seeker", "Written_seeker", "Faded_seeker", "Dule_Seeker", "Old_seeker", "Strong_seeker", "Weaveshaper_seeker", "Fabled_seeker", "Prince_seeker"];
         let activeUser = "";
+        
+        // --- GAMEPLAY VARIABLES ---
         let shields = 100;
-        let anomalyActive = false;
-        let corruptionLevel = 10;
+        let maxShields = 100;
+        let energy = 100;
+        let corruptionLevel = 0;
+        let dataExtracted = 0;
+        
+        let currentAnomaly = null;
+        let anomalyTimeout = null;
+        let gameLoops = [];
+        let gameActive = false;
 
         const termInput = document.getElementById('termInput');
         const termOutput = document.getElementById('termOutput');
         const commsFeed = document.getElementById('commsFeed');
+        const statsDisplay = document.getElementById('statsDisplay');
 
         window.enterVoid = function() {
             const inputVal = document.getElementById('gateUsername').value.trim();
-            const errorDiv = document.getElementById('gateError');
             const matchedUser = validUsers.find(u => u.toLowerCase() === inputVal.toLowerCase());
 
             if (!matchedUser) {
-                errorDiv.textContent = "DECREE DENIED: Identity signature mismatch. Void bypass unachievable.";
+                document.getElementById('gateError').textContent = "DECREE DENIED: Identity signature mismatch.";
                 return;
             }
 
@@ -318,9 +158,11 @@
             document.getElementById('loginGate').style.display = 'none';
             termInput.disabled = false;
             termInput.focus();
+            gameActive = true;
 
-            initMultiplayer();
+            startNarrative();
             startEventLoops();
+            updateStats();
         }
 
         // ==========================================
@@ -328,14 +170,18 @@
         // ==========================================
         termInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                const cmd = this.value.trim().toLowerCase();
+                const rawCmd = this.value.trim().toLowerCase();
                 this.value = "";
-                if(!cmd) return;
+                if(!rawCmd || !gameActive) return;
 
-                printLog(`&gt; ${cmd}`, '#FFFFFF');
-                processCommand(cmd);
+                printLog(`&gt; ${rawCmd}`, '#FFFFFF');
+                processCommand(rawCmd);
             }
         });
+
+        function updateStats() {
+            statsDisplay.innerHTML = `SHLD: <span style="color:${shields < 30 ? '#FF0000' : '#FFF'}">${shields}/${maxShields}</span> | NRG: <span style="color:${energy < 25 ? '#FF0000' : '#FFF'}">${energy}%</span> | DATA: <span style="color:#00FFCC">${dataExtracted}%</span> | CRPT: <span style="color:${corruptionLevel > 75 ? '#FF0000' : '#FFF'}">${corruptionLevel}%</span>`;
+        }
 
         function printLog(text, color = '#FF3333') {
             const line = document.createElement('div');
@@ -345,135 +191,171 @@
             termOutput.scrollTop = termOutput.scrollHeight;
         }
 
-        function pushComms(text, isAlert = false) {
+        function pushComms(text, styleType = 'normal') {
             const msg = document.createElement('div');
-            msg.className = isAlert ? 'comms-msg comms-alert' : 'comms-msg';
+            if (styleType === 'alert') msg.className = 'comms-msg comms-alert';
+            else if (styleType === 'story') msg.className = 'comms-msg comms-story';
+            else msg.className = 'comms-msg';
+            
             msg.textContent = text;
             commsFeed.appendChild(msg);
             commsFeed.scrollTop = commsFeed.scrollHeight;
         }
 
-        function processCommand(cmd) {
+        function processCommand(rawCmd) {
+            const args = rawCmd.split(" ");
+            const cmd = args[0];
+
+            // 1. Check for Active Anomaly Abort Code
+            if (currentAnomaly && cmd === currentAnomaly.cmd) {
+                if (args[1] === currentAnomaly.code) {
+                    resolveAnomaly();
+                } else {
+                    printLog(`[ERR]: Invalid abort sequence. Expected: ${currentAnomaly.cmd} ${currentAnomaly.code}`, '#FF0000');
+                }
+                return;
+            }
+
+            // 2. Standard Commands
             switch(cmd) {
                 case 'help':
-                    printLog("AVAILABLE SYSTEM PROTOCOLS:", '#FFAAAA');
+                    printLog("SYSTEM PROTOCOLS:", '#FFAAAA');
+                    printLog(" - <span style='color:#FFF;'>extract</span>: [-25 Energy] Download 20% of core data. (WIN CONDITION)");
+                    printLog(" - <span style='color:#FFF;'>siphon</span>: [+40 Energy, +15 Corruption] Pull raw void power.");
+                    printLog(" - <span style='color:#FFF;'>vent</span>: [-20 Corruption, -20 Max Shields] Bleed off corruption.");
+                    printLog(" - <span style='color:#FFF;'>fortify</span>: [-20 Energy] Repair up to 30 Shield points.");
                     printLog(" - <span style='color:#FFF;'>status</span>: Inspect local core metrics.");
-                    printLog(" - <span style='color:#FFF;'>fortify</span>: Run shell calculations to stabilize shields (+25%).");
-                    printLog(" - <span style='color:#FFF;'>purge</span>: Flash internal log cache to flush local disturbances.");
-                    printLog(" - <span style='color:#FFF;'>probe</span>: Force-ping surrounding multiplayer void space nodes.");
-                    printLog(" - <span style='color:#FFF;'>override_404</span>: Dangerous. Forces entry to restricted sector levels.");
                     break;
-                case 'status':
-                    printLog(`USER NODE: ${activeUser}`);
-                    printLog(`SHIELD PROTECTION VALUE: ${shields}%`);
-                    printLog(`ENVIRONMENTAL CORRUPTION COEFFICIENT: ${corruptionLevel}%`);
+
+                case 'extract':
+                    if (energy < 25) { printLog("INSUFFICIENT ENERGY. Siphon required.", '#FF0000'); break; }
+                    energy -= 25;
+                    dataExtracted += 20;
+                    printLog(`Extracting data block... [DATA +20%]`, '#00FFCC');
+                    if (dataExtracted >= 100) triggerWin();
                     break;
+
+                case 'siphon':
+                    energy = Math.min(100, energy + 40);
+                    corruptionLevel += 15;
+                    printLog(`Void energy harnessed. [ENERGY +40, CORRUPTION +15]`, '#FF8888');
+                    if (corruptionLevel >= 100) triggerGameOver("CORRUPTION MAXIMUM REACHED. ASSIMILATED.");
+                    break;
+
+                case 'vent':
+                    if (maxShields <= 20) { printLog("CRITICAL: Cannot vent. Max shields too low to survive process.", '#FF0000'); break; }
+                    corruptionLevel = Math.max(0, corruptionLevel - 20);
+                    maxShields -= 20;
+                    shields = Math.min(shields, maxShields);
+                    printLog(`Purging volatile data. [CORRUPTION -20, MAX SHIELDS -20]`, '#FFCC00');
+                    break;
+
                 case 'fortify':
-                    if (shields >= 100) {
-                        printLog("Shields already operating at max containment thresholds.");
-                    } else {
-                        shields = Math.min(100, shields + 25);
-                        document.getElementById('shieldDisplay').textContent = `SHIELDS: ${shields}%`;
-                        printLog("Shield arrays reinforced. Visual cohesion metrics improving.", '#00FFCC');
-                        pushComms(`[COMMS]: Seeker ${activeUser} initialized stabilization protocols.`);
-                    }
+                    if (energy < 20) { printLog("INSUFFICIENT ENERGY. Siphon required.", '#FF0000'); break; }
+                    if (shields >= maxShields) { printLog(`Shields at current maximum capacity (${maxShields}).`); break; }
+                    energy -= 20;
+                    shields = Math.min(maxShields, shields + 30);
+                    printLog(`Reinforcing arrays. [SHIELDS +30]`, '#00FFCC');
                     break;
-                case 'purge':
-                    printLog("Purging environment variables...", '#FFCC00');
-                    if (anomalyActive) {
-                        anomalyActive = false;
-                        document.body.style.filter = "none";
-                        document.body.style.transform = "none";
-                        printLog("Local structural anomaly successfully collapsed.", '#00FFCC');
-                        pushComms("[COMMS]: Spatial disturbance purged by local user command.");
-                    } else {
-                        printLog("No active anomaly traces detected in local buffer arrays.");
-                    }
+
+                case 'status':
+                    printLog(`USER: ${activeUser} | INTEGRITY: ${shields}/${maxShields} | CORRUPTION: ${corruptionLevel}%`);
+                    if (currentAnomaly) printLog(`CRITICAL ALERT: ${currentAnomaly.name} IN PROGRESS`, '#FF0000');
                     break;
-                case 'probe':
-                    printLog("Broadcasting wide-band sub-space ping...", '#FF00FF');
-                    pushComms(`[ALERT]: Probe array launched by ${activeUser}. Tracking spatial ghosts.`);
-                    triggerRandomEvent(0.8); // FIXED SYNTAX ERROR HERE
-                    break;
-                case 'override_404':
-                    printLog("CRITICAL EXCEPTION: Attempting raw root authentication down deep vectors...", '#FF0000');
-                    setTimeout(() => { triggerJumpScare(); }, 1500);
-                    break;
+
                 default:
-                    printLog(`Command execution failure: '${cmd}' is unrecognized by the Hub fallback matrix.`, '#FF8888');
+                    printLog(`Command execution failure: '${cmd}' is unrecognized.`, '#FF5555');
             }
+            updateStats();
         }
 
         // ==========================================
-        // DYNAMIC & SCRIPTED INCIDENTS
+        // NARRATIVE & EVENT LOOPS
         // ==========================================
+        function startNarrative() {
+            setTimeout(() => pushComms("OPERATOR: Can you hear me? You're in deep. We need that void data.", 'story'), 3000);
+            setTimeout(() => pushComms("OPERATOR: Type 'help' to see your toolkit. Your goal is to 'extract' 100% of the data.", 'story'), 8000);
+            setTimeout(() => pushComms("OPERATOR: Extracting takes Energy. Use 'siphon' to get more, but it WILL corrupt you.", 'story'), 20000);
+            setTimeout(() => pushComms("OPERATOR: If your corruption gets too high, use 'vent'. It will lower your max shields permanently. Be careful.", 'story'), 35000);
+        }
+
         function startEventLoops() {
-            // Check for random chaotic events every 12 seconds
-            setInterval(() => {
-                if (Math.random() < 0.4) {
-                    triggerRandomEvent(Math.random());
-                }
-            }, 12000);
+            // Passive corruption increase
+            gameLoops.push(setInterval(() => {
+                if(!gameActive) return;
+                corruptionLevel += 2;
+                if (corruptionLevel >= 100) triggerGameOver("CORRUPTION MAXIMUM REACHED. ASSIMILATED.");
+                updateStats();
+            }, 5000));
 
-            // Steadily build stress over time
-            setInterval(() => {
-                corruptionLevel = Math.min(100, corruptionLevel + 2);
-                if (corruptionLevel >= 75 && Math.random() < 0.3) {
-                    pushComms("[WARNING]: System corruption levels are entering extreme variance limits!", true);
-                }
-                if (corruptionLevel >= 100) {
-                    triggerJumpScare();
-                }
-            }, 5000);
+            // Dynamic Anomaly Spawner
+            gameLoops.push(setInterval(() => {
+                if (!gameActive || currentAnomaly) return;
+                // Chance scales up based on corruption
+                let chance = 0.3 + (corruptionLevel / 200); 
+                if (Math.random() < chance) triggerAnomaly();
+            }, 12000));
         }
 
-        function triggerRandomEvent(roll) {
-            anomalyActive = true;
+        // ==========================================
+        // ANOMALY MECHANICS
+        // ==========================================
+        function triggerAnomaly() {
+            const types = [
+                { name: "INVERSION SPIKE", cmd: "recalibrate", effect: "invert(100%) hue-rotate(180deg)" },
+                { name: "SPATIAL DISTORTION", cmd: "anchor", effect: "scale(0.95) rotate(2deg) blur(2px) contrast(200%)" },
+                { name: "CORE BREACH", cmd: "seal", effect: "sepia(100%) saturate(300%) hue-rotate(300deg)" }
+            ];
             
-            if (roll < 0.25) {
-                // Event 1: Inversion Spike
-                document.body.style.filter = "invert(100%) hue-rotate(180deg)";
-                printLog("!! INVERSION SPIKE DETECTED !! Use 'purge' to restore vision matrices!", '#FF0000');
-                pushComms("[COMMS]: Optical framework phase shift observed in localized zone.", true);
-                damageShields(15);
-            } else if (roll < 0.50) {
-                // Event 2: Spatial Distortion Matrix
-                document.body.style.transform = "scale(0.95) rotate(2deg)";
-                document.body.style.filter = "blur(2px) contrast(200%)";
-                printLog("!! SPATIAL COMPRESSION INCIDENT !! Reality anchor slipping. Use 'purge'!", '#FF0000');
-                pushComms("[COMMS]: Local grid coordinates buckling under structural load.", true);
-                damageShields(20);
-            } else if (roll < 0.75) {
-                // Event 3: Comms Static Overwhelm
-                pushComms("[UNRECOGNIZED SIGNAL]: I can feel the leather of the suit turning to skin...", true);
-                pushComms("[UNRECOGNIZED SIGNAL]: HELP ME METER THE TIDE", true);
-                printLog("Intrusive frequencies detected flooding the feed buffer registers.", '#FFCC00');
-                damageShields(10);
-            } else {
-                // Event 4: Ghost Encounter Echo
-                printLog("A phantom data packet has briefly attached to your cursor path.", '#FF00FF');
-                pushComms("[COMMS]: Transient presence detected tracking nearby user telemetry lines.");
-            }
+            let type = types[Math.floor(Math.random() * types.length)];
+            let code = Math.floor(1000 + Math.random() * 9000).toString(); // 4 digit code
+            currentAnomaly = { ...type, code: code };
+
+            document.body.style.filter = type.effect;
+            if(type.cmd === 'anchor') document.body.style.transform = "scale(0.95) rotate(2deg)";
+            
+            printLog(`!! ${type.name} DETECTED !!`, '#FF0000');
+            printLog(`> OVERRIDE REQUIRED. TYPE '${type.cmd} ${code}' NOW.`, '#FFCC00');
+            pushComms(`[WARNING]: ${type.name} imminent. Local reality failing.`, 'alert');
+
+            // 8 second window to fix
+            anomalyTimeout = setTimeout(() => { failAnomaly(); }, 8000);
         }
 
-        function damageShields(amt) {
-            shields = Math.max(0, shields - amt);
-            document.getElementById('shieldDisplay').textContent = `SHIELDS: ${shields}%`;
-            if (shields <= 0) {
-                printLog("CRITICAL OUTAGE: SYSTEM CONTAINMENT DEAD.", '#FF0000');
-                setTimeout(() => { triggerJumpScare(); }, 1000);
-            }
+        function resolveAnomaly() {
+            clearTimeout(anomalyTimeout);
+            resetVisuals();
+            printLog(`> Code accepted. Anomaly neutralised.`, '#00FFCC');
+            currentAnomaly = null;
+        }
+
+        function failAnomaly() {
+            resetVisuals();
+            printLog(`!! ANOMALY DETONATED !! Structural damage sustained!`, '#FF0000');
+            shields -= 35;
+            corruptionLevel += 10;
+            currentAnomaly = null;
+            updateStats();
+
+            if (shields <= 0) triggerGameOver("SHIELDS DEPLETED. CRUSHED BY THE VOID.");
+        }
+
+        function resetVisuals() {
+            document.body.style.filter = "none";
+            document.body.style.transform = "none";
         }
 
         // ==========================================
-        // CRITICAL SYSTEM JUMP SCARE EFFECT
+        // GAME OVER & WIN STATES
         // ==========================================
-        function triggerJumpScare() {
+        function triggerGameOver(reason) {
+            gameActive = false;
+            gameLoops.forEach(clearInterval);
             const overlay = document.getElementById('jumpScareOverlay');
             const face = document.getElementById('scareFace');
+            const endMsg = document.getElementById('endMessage');
             overlay.style.display = 'flex';
 
-            // String of horrific system symbols morphing quickly
             const faces = ["Ø_Ø", "☠_☠", "4_0_4", "ERR_VOID", "F_L_E_S_H"];
             let idx = 0;
             const faceInterval = setInterval(() => {
@@ -484,19 +366,39 @@
 
             setTimeout(() => {
                 clearInterval(faceInterval);
-                overlay.innerHTML = "<div style='font-size:20px; text-align:center;'>CORE ASSIMILATION COMPLETE.<br>CONNECTION TERMINATED.</div>";
-                setTimeout(() => {
-                    window.location.href = "index.html";
-                }, 2000);
+                document.body.style.filter = "none";
+                face.style.display = 'none';
+                endMsg.style.display = 'block';
+                endMsg.innerHTML = `${reason}<br><br><span style="font-size:14px; color:#FF3333;">CONNECTION TERMINATED.</span>`;
             }, 1800);
         }
 
+        function triggerWin() {
+            gameActive = false;
+            gameLoops.forEach(clearInterval);
+            resetVisuals();
+            
+            const overlay = document.getElementById('jumpScareOverlay');
+            const face = document.getElementById('scareFace');
+            const endMsg = document.getElementById('endMessage');
+            
+            overlay.style.display = 'flex';
+            overlay.style.background = '#FFFFFF';
+            overlay.style.color = '#000000';
+            face.style.display = 'none';
+            
+            endMsg.style.display = 'block';
+            endMsg.style.color = '#000000';
+            endMsg.innerHTML = `<strong>DATA EXTRACTION: 100%</strong><br><br>NODE SEVERED SUCCESSFULLY.<br>YOU SURVIVED.`;
+        }
+
         // ==========================================
-        // MULTIPLAYER GHOST RENDERING
+        // ATMOSPHERIC CURSOR BLEED
         // ==========================================
         const canvas = document.getElementById('voidCanvas');
         const ctx = canvas.getContext('2d');
         let width, height;
+        let mouseTrails = [];
 
         function resize() {
             width = canvas.width = window.innerWidth;
@@ -505,56 +407,28 @@
         window.addEventListener('resize', resize);
         resize();
 
-        let mouseX = width / 2;
-        let mouseY = height / 2;
-        let otherPlayers = {};
-
         window.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
+            mouseTrails.push({ x: e.clientX, y: e.clientY, alpha: 1 });
+            if (mouseTrails.length > 20) mouseTrails.shift();
         });
 
-        function initMultiplayer() {
-            onSnapshot(doc(db, "alpha_void", "ghosts"), (docSnap) => {
-                if (docSnap.exists()) {
-                    otherPlayers = docSnap.data();
-                }
-            });
-
-            setInterval(() => {
-                if (!activeUser) return;
-                setDoc(doc(db, "alpha_void", "ghosts"), {
-                    [activeUser]: {
-                        x: mouseX / width,
-                        y: mouseY / height,
-                        timestamp: Date.now()
-                    }
-                }, { merge: true });
-            }, 200);
-        }
-
         function drawVoid() {
-            ctx.fillStyle = 'rgba(5, 0, 0, 0.2)';
+            ctx.fillStyle = 'rgba(5, 0, 0, 0.3)';
             ctx.fillRect(0, 0, width, height);
-
-            const now = Date.now();
-            for (const [user, data] of Object.entries(otherPlayers)) {
-                if (user === activeUser) continue;
-
-                if (now - data.timestamp < 4000) {
-                    const drawX = data.x * width;
-                    const drawY = data.y * height;
-
-                    ctx.beginPath();
-                    ctx.arc(drawX, drawY, 6 + Math.random()*5, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(255, 0, 0, ${0.4 + Math.random()*0.4})`;
-                    ctx.fill();
-
-                    ctx.fillStyle = '#FF5555';
-                    ctx.font = "10px 'Courier New'";
-                    ctx.fillText(`[GHOST: ${user}]`, drawX - 30, drawY - 15);
+            ctx.beginPath();
+            for (let i = 0; i < mouseTrails.length; i++) {
+                const pt = mouseTrails[i];
+                ctx.strokeStyle = `rgba(255, 0, 0, ${pt.alpha})`;
+                ctx.lineWidth = i * 0.5;
+                if (i === 0) ctx.moveTo(pt.x, pt.y);
+                else ctx.lineTo(pt.x, pt.y);
+                
+                if (Math.random() > 0.8) {
+                    ctx.lineTo(pt.x + (Math.random()-0.5)*50, pt.y + (Math.random()-0.5)*50);
                 }
+                pt.alpha -= 0.05;
             }
+            ctx.stroke();
             requestAnimationFrame(drawVoid);
         }
         drawVoid();
