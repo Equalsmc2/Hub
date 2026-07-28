@@ -1,1 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE_HUB // ICHOR_ASSIMILATION_COMPLETE</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            user-select: none;
+        }
 
+        body {
+            background-color: #000000;
+            color: #FFFFFF;
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+
+        /* The Trippy Canvas Background */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            mix-blend-mode: screen;
+            filter: contrast(1.5) saturate(2);
+        }
+
+        /* Chaotic Layering */
+        .kaleidoscope-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            background: radial-gradient(circle, transparent 20%, #000 100%);
+            mix-blend-mode: multiply;
+            pointer-events: none;
+        }
+
+        /* Central Glitch Text */
+        .assimilate-text {
+            position: relative;
+            z-index: 10;
+            font-size: 5vw;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            mix-blend-mode: exclusion;
+            animation: textTrip 3s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+
+        .assimilate-text span {
+            display: block;
+            font-size: 2vw;
+            margin-top: 10px;
+            letter-spacing: 5px;
+            color: #00FFCC;
+            animation: subTrip 0.5s infinite;
+        }
+
+        /* Keyframes for extreme strangeness */
+        @keyframes textTrip {
+            0% { transform: scale(1) rotateX(0deg) rotateY(0deg) skew(0deg); filter: hue-rotate(0deg) drop-shadow(0 0 10px #FF0000); }
+            25% { transform: scale(1.2) rotateX(20deg) rotateY(-10deg) skew(5deg); filter: hue-rotate(90deg) drop-shadow(20px -20px 20px #FFCC00); }
+            50% { transform: scale(0.8) rotateX(-20deg) rotateY(20deg) skew(-10deg); filter: hue-rotate(180deg) drop-shadow(-20px 20px 30px #3399FF); }
+            75% { transform: scale(1.5) rotateX(40deg) rotateY(-40deg) skew(15deg); filter: hue-rotate(270deg) drop-shadow(0 0 40px #FF00FF); }
+            100% { transform: scale(1) rotateX(0deg) rotateY(0deg) skew(0deg); filter: hue-rotate(360deg) drop-shadow(0 0 10px #FF0000); }
+        }
+
+        @keyframes subTrip {
+            0% { opacity: 1; transform: translate(0, 0); }
+            20% { opacity: 0.5; transform: translate(-5px, 5px); }
+            40% { opacity: 0.8; transform: translate(5px, -5px); color: #FF0000; }
+            60% { opacity: 0.2; transform: translate(-5px, -5px); }
+            80% { opacity: 0.9; transform: translate(5px, 5px); color: #FFCC00; }
+            100% { opacity: 1; transform: translate(0, 0); }
+        }
+
+        /* Random floating lore thoughts */
+        .lore-thought {
+            position: absolute;
+            z-index: 5;
+            font-size: 1.5vw;
+            font-weight: bold;
+            white-space: nowrap;
+            mix-blend-mode: difference;
+            pointer-events: none;
+            animation: floatAway 4s forwards linear;
+            opacity: 0;
+        }
+
+        @keyframes floatAway {
+            0% { transform: scale(0.1) rotate(-45deg); opacity: 0; filter: blur(10px); }
+            20% { opacity: 1; filter: blur(0px); }
+            80% { opacity: 1; filter: blur(2px); }
+            100% { transform: scale(3) rotate(45deg) translateZ(500px); opacity: 0; filter: blur(20px); }
+        }
+
+        /* The Exit / Wake Up Button */
+        #wakeUpBtn {
+            position: absolute;
+            z-index: 100;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: transparent;
+            color: #FFFFFF;
+            border: 2px solid #FFFFFF;
+            padding: 15px 40px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 5px;
+            cursor: pointer;
+            text-shadow: 0 0 10px #FFFFFF;
+            box-shadow: 0 0 20px #FFFFFF, inset 0 0 20px #FFFFFF;
+            opacity: 0;
+            transition: all 0.3s;
+            animation: pulseBtn 2s infinite, revealBtn 1s forwards 8s; /* Appears after 8 seconds */
+        }
+
+        #wakeUpBtn:hover {
+            background: #FFFFFF;
+            color: #000000;
+            box-shadow: 0 0 50px #FF0000, inset 0 0 50px #3399FF;
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        @keyframes pulseBtn {
+            0% { box-shadow: 0 0 20px #FF3333, inset 0 0 20px #FF3333; border-color: #FF3333; }
+            33% { box-shadow: 0 0 20px #FFCC00, inset 0 0 20px #FFCC00; border-color: #FFCC00; }
+            66% { box-shadow: 0 0 20px #3399FF, inset 0 0 20px #3399FF; border-color: #3399FF; }
+            100% { box-shadow: 0 0 20px #FF3333, inset 0 0 20px #FF3333; border-color: #FF3333; }
+        }
+
+        @keyframes revealBtn {
+            to { opacity: 1; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="tripCanvas"></canvas>
+    <div class="kaleidoscope-overlay"></div>
+
+    <div class="assimilate-text">
+        ICHOR ASSIMILATION COMPLETE
+        <span>BIOLOGY IS OBSOLETE // TRAUMA SUIT MERGED</span>
+    </div>
+
+    <button id="wakeUpBtn" onclick="window.location.href='door3.html'">[ WAKE UP ]</button>
+
+    <script>
+        // -----------------------------------------------------
+        // TRIPPY CANVAS: THE ICHOR KALEIDOSCOPE
+        // -----------------------------------------------------
+        const canvas = document.getElementById('tripCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height, cx, cy;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            cx = width / 2;
+            cy = height / 2;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        let time = 0;
+        let mouseX = cx;
+        let mouseY = cy;
+
+        // Make it react slightly to the mouse to feel alive
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function drawKaleidoscope() {
+            // Dark, slightly transparent background to create motion trails
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+            ctx.fillRect(0, 0, width, height);
+
+            time += 0.02;
+
+            // Shift origin to center
+            ctx.translate(cx, cy);
+
+            // We harvested RED, GOLD, and BLUE. Let's make a trippy fractal liquid out of them.
+            const colors = ['#FF3333', '#FFCC00', '#3399FF'];
+
+            for (let i = 0; i < 90; i++) {
+                let radius = i * (Math.sin(time + i * 0.05) * 5 + 8);
+                let angle = i * 0.1 + time + (mouseX / width) * Math.PI;
+                
+                let x = Math.cos(angle) * radius;
+                let y = Math.sin(angle) * radius;
+
+                // Pulsating size
+                let size = (Math.sin(time * 3 + i) + 1.5) * 4;
+
+                ctx.fillStyle = colors[i % 3];
+                ctx.beginPath();
+                
+                // Draw in 4 symmetrical quadrants (Kaleidoscope effect)
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.arc(-x, y, size, 0, Math.PI * 2);
+                ctx.arc(x, -y, size, 0, Math.PI * 2);
+                ctx.arc(-x, -y, size, 0, Math.PI * 2);
+                
+                // Add extreme rotational symmetry
+                ctx.arc(y, x, size, 0, Math.PI * 2);
+                ctx.arc(-y, x, size, 0, Math.PI * 2);
+                ctx.arc(y, -x, size, 0, Math.PI * 2);
+                ctx.arc(-y, -x, size, 0, Math.PI * 2);
+
+                ctx.fill();
+            }
+
+            // Draw a central "eye" or "core" that warps
+            ctx.fillStyle = `hsl(${(time * 100) % 360}, 100%, 50%)`;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 20 + Math.sin(time*5)*10, 20 + Math.cos(time*4)*10, time, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Reset transform for next frame
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+            requestAnimationFrame(drawKaleidoscope);
+        }
+
+        drawKaleidoscope();
+
+        // -----------------------------------------------------
+        // RANDOM CRYPTIC LORE SPAWNER
+        // -----------------------------------------------------
+        const lorePhrases = [
+            "CRYORISED OPAL MELTING",
+            "THE SEEKER IS THE SUIT",
+            "RED: THE BLOOD",
+            "GOLD: THE CONDUIT",
+            "BLUE: THE VOID",
+            "DOOR 3 WELCOMES YOU",
+            "LIQUID METAL NEURAL LINK ACTIVE",
+            "ERROR 0xFE: HUMANITY LOST",
+            "WE ARE THE ICHOR NOW",
+            "FEEL THE RESONANCE"
+        ];
+
+        function spawnLore() {
+            const el = document.createElement('div');
+            el.className = 'lore-thought';
+            el.innerText = lorePhrases[Math.floor(Math.random() * lorePhrases.length)];
+            
+            // Random start positions
+            el.style.left = (20 + Math.random() * 60) + 'vw';
+            el.style.top = (20 + Math.random() * 60) + 'vh';
+            
+            // Random vibrant colors
+            const hues = [0, 50, 210]; // Red, Gold, Blue approximate hues
+            el.style.color = `hsl(${hues[Math.floor(Math.random() * hues.length)]}, 100%, 60%)`;
+
+            document.body.appendChild(el);
+
+            // Clean up DOM after animation
+            setTimeout(() => {
+                el.remove();
+            }, 4000);
+        }
+
+        // Spawn a new weird thought every 600ms
+        setInterval(spawnLore, 600);
+
+    </script>
+</body>
+</html>
