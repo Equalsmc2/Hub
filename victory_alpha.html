@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<!-- you have what you need to know -->
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE_HUB // ERROR_404_VOID</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #330000;
+            color: #FF5555;
+            font-family: 'Courier New', Courier, monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            overflow: hidden;
+            user-select: none;
+            animation: bgPulse 0.5s infinite alternate;
+        }
+
+        @keyframes bgPulse {
+            0% { background-color: #330000; }
+            100% { background-color: #550000; }
+        }
+
+        .error-container {
+            background: rgba(0, 0, 0, 0.7);
+            border: 3px solid #FF0000;
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.5);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .error-code {
+            font-size: 64px;
+            font-weight: bold;
+            color: #FF0000;
+            text-shadow: 3px 3px #000;
+            margin-bottom: 10px;
+            animation: glitchText 0.2s infinite;
+        }
+
+        @keyframes glitchText {
+            0% { transform: translate(0, 0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -1px); }
+            60% { transform: translate(-1px, -2px); }
+            80% { transform: translate(1px, 1px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        .error-message {
+            font-size: 18px;
+            color: #FFAAAA;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px #000;
+        }
+
+        .lore-details {
+            font-size: 13px;
+            color: rgba(255, 85, 85, 0.8);
+            margin-bottom: 30px;
+            line-height: 1.5;
+            border-top: 1px dashed #FF5555;
+            border-bottom: 1px dashed #FF5555;
+            padding: 15px 0;
+        }
+
+        .back-btn {
+            background: #FF0000;
+            color: #FFFFFF;
+            border: 2px solid #FFAAAA;
+            padding: 12px 25px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            text-shadow: 1px 1px #000;
+            width: 100%;
+        }
+
+        .back-btn:hover {
+            background: #FFFFFF;
+            color: #550000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="error-container">
+        <div class="error-code">404</div>
+        <div class="error-message">[SECTOR_ALPHA_GATEWAY_NOT_FOUND]</div>
+        <div class="lore-details">
+            CRITICAL EXCEPTION: The viral Ichor stream has destabilized the archival routing index. Cryorised Opal fragments indicate this sector has dissolved back into the central Hub mainframe network.
+        </div>
+        <button class="back-btn" onclick="returnToHub()">RETURN TO THE HUB</button>
+    </div>
+
+    <script>
+        window.returnToHub = function() {
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>
