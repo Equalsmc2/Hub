@@ -22,10 +22,45 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            perspective: 1000px;
+            transition: filter 0.3s ease, transform 0.1s ease;
         }
 
-        /* The Trippy Canvas Background */
+        /* 
+          CSS EFFECT CLASSES 
+          (Effects 5 through 9)
+        */
+        body.fx-invert { filter: invert(100%) hue-rotate(180deg); }
+        body.fx-hypercolor { filter: contrast(300%) saturate(800%) hue-rotate(90deg); }
+        body.fx-melt { filter: blur(4px) contrast(400%); }
+        body.fx-shake { animation: severeShake 0.1s infinite; }
+        
+        .fx-scanlines {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        body.fx-scanlines-active .fx-scanlines { opacity: 1; }
+
+        @keyframes severeShake {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(0px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(2px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(2px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        /* Canvas Layers */
         canvas {
             position: absolute;
             top: 0;
@@ -34,10 +69,8 @@
             height: 100vh;
             z-index: 1;
             mix-blend-mode: screen;
-            filter: contrast(1.5) saturate(2);
         }
 
-        /* Chaotic Layering */
         .kaleidoscope-overlay {
             position: absolute;
             top: 0;
@@ -45,7 +78,7 @@
             width: 100%;
             height: 100%;
             z-index: 2;
-            background: radial-gradient(circle, transparent 20%, #000 100%);
+            background: radial-gradient(circle, transparent 10%, #000 100%);
             mix-blend-mode: multiply;
             pointer-events: none;
         }
@@ -70,55 +103,69 @@
             margin-top: 10px;
             letter-spacing: 5px;
             color: #00FFCC;
-            animation: subTrip 0.5s infinite;
+            animation: subTrip 0.2s infinite;
         }
 
-        /* Keyframes for extreme strangeness */
         @keyframes textTrip {
-            0% { transform: scale(1) rotateX(0deg) rotateY(0deg) skew(0deg); filter: hue-rotate(0deg) drop-shadow(0 0 10px #FF0000); }
-            25% { transform: scale(1.2) rotateX(20deg) rotateY(-10deg) skew(5deg); filter: hue-rotate(90deg) drop-shadow(20px -20px 20px #FFCC00); }
-            50% { transform: scale(0.8) rotateX(-20deg) rotateY(20deg) skew(-10deg); filter: hue-rotate(180deg) drop-shadow(-20px 20px 30px #3399FF); }
-            75% { transform: scale(1.5) rotateX(40deg) rotateY(-40deg) skew(15deg); filter: hue-rotate(270deg) drop-shadow(0 0 40px #FF00FF); }
-            100% { transform: scale(1) rotateX(0deg) rotateY(0deg) skew(0deg); filter: hue-rotate(360deg) drop-shadow(0 0 10px #FF0000); }
+            0% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 10px #FF0000); }
+            25% { transform: scale(1.1) rotate(-2deg) skew(5deg); filter: drop-shadow(10px -10px 20px #FFCC00); }
+            50% { transform: scale(0.9) rotate(2deg) skew(-5deg); filter: drop-shadow(-10px 10px 30px #3399FF); }
+            75% { transform: scale(1.2) rotate(-4deg); filter: drop-shadow(0 0 40px #FF00FF); }
+            100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 10px #FF0000); }
         }
 
         @keyframes subTrip {
             0% { opacity: 1; transform: translate(0, 0); }
-            20% { opacity: 0.5; transform: translate(-5px, 5px); }
-            40% { opacity: 0.8; transform: translate(5px, -5px); color: #FF0000; }
-            60% { opacity: 0.2; transform: translate(-5px, -5px); }
-            80% { opacity: 0.9; transform: translate(5px, 5px); color: #FFCC00; }
+            25% { opacity: 0.5; transform: translate(-3px, 3px); color: #FF0000; }
+            50% { opacity: 0.8; transform: translate(3px, -3px); color: #3399FF; }
+            75% { opacity: 0.2; transform: translate(-3px, -3px); color: #FFCC00; }
             100% { opacity: 1; transform: translate(0, 0); }
         }
 
-        /* Random floating lore thoughts */
-        .lore-thought {
+        /* Radio Comms HUD */
+        .radio-comms {
             position: absolute;
-            z-index: 5;
-            font-size: 1.5vw;
-            font-weight: bold;
-            white-space: nowrap;
-            mix-blend-mode: difference;
+            bottom: 30px;
+            left: 30px;
+            width: 450px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.7);
+            border-left: 4px solid #FF0000;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
             pointer-events: none;
-            animation: floatAway 4s forwards linear;
-            opacity: 0;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
         }
 
-        @keyframes floatAway {
-            0% { transform: scale(0.1) rotate(-45deg); opacity: 0; filter: blur(10px); }
-            20% { opacity: 1; filter: blur(0px); }
-            80% { opacity: 1; filter: blur(2px); }
-            100% { transform: scale(3) rotate(45deg) translateZ(500px); opacity: 0; filter: blur(20px); }
+        .radio-header {
+            color: #FF0000;
+            font-size: 12px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            animation: flashText 1s infinite;
         }
 
-        /* The Exit / Wake Up Button */
+        .radio-body {
+            color: #00FFCC;
+            font-size: 14px;
+            line-height: 1.4;
+            min-height: 60px;
+            text-shadow: 0 0 5px #00FFCC;
+        }
+
+        @keyframes flashText {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Wake Up Button */
         #wakeUpBtn {
             position: absolute;
-            z-index: 100;
+            z-index: 200;
             bottom: 10%;
             left: 50%;
             transform: translateX(-50%);
-            background: transparent;
+            background: rgba(0, 0, 0, 0.5);
             color: #FFFFFF;
             border: 2px solid #FFFFFF;
             padding: 15px 40px;
@@ -130,8 +177,14 @@
             text-shadow: 0 0 10px #FFFFFF;
             box-shadow: 0 0 20px #FFFFFF, inset 0 0 20px #FFFFFF;
             opacity: 0;
+            pointer-events: none;
             transition: all 0.3s;
-            animation: pulseBtn 2s infinite, revealBtn 1s forwards 8s; /* Appears after 8 seconds */
+            animation: pulseBtn 1s infinite;
+        }
+
+        #wakeUpBtn.visible {
+            opacity: 1;
+            pointer-events: all;
         }
 
         #wakeUpBtn:hover {
@@ -147,33 +200,38 @@
             66% { box-shadow: 0 0 20px #3399FF, inset 0 0 20px #3399FF; border-color: #3399FF; }
             100% { box-shadow: 0 0 20px #FF3333, inset 0 0 20px #FF3333; border-color: #FF3333; }
         }
-
-        @keyframes revealBtn {
-            to { opacity: 1; }
-        }
-
     </style>
 </head>
 <body>
 
+    <div class="fx-scanlines"></div>
     <canvas id="tripCanvas"></canvas>
     <div class="kaleidoscope-overlay"></div>
 
     <div class="assimilate-text">
         ICHOR ASSIMILATION COMPLETE
-        <span>BIOLOGY IS OBSOLETE // TRAUMA SUIT MERGED</span>
+        <span>SYSTEM OVERRIDE // FLESH TO METAL</span>
+    </div>
+
+    <div class="radio-comms">
+        <div class="radio-header">>> INTERCEPTED COMMS // ENCRYPTED_CHANNEL_ALPHA</div>
+        <div class="radio-body" id="radioText">...</div>
     </div>
 
     <button id="wakeUpBtn" onclick="window.location.href='door3.html'">[ WAKE UP ]</button>
 
     <script>
-        // -----------------------------------------------------
-        // TRIPPY CANVAS: THE ICHOR KALEIDOSCOPE
-        // -----------------------------------------------------
+        /* 
+           THE 10 TRIPPY EFFECTS SYSTEM
+           0-4: Canvas Manipulation Effects
+           5-9: CSS Manipulation Effects
+           Exactly 3 run simultaneously, rotating randomly every 3 seconds.
+        */
+
         const canvas = document.getElementById('tripCanvas');
         const ctx = canvas.getContext('2d');
-
         let width, height, cx, cy;
+        let time = 0;
 
         function resize() {
             width = canvas.width = window.innerWidth;
@@ -184,110 +242,194 @@
         window.addEventListener('resize', resize);
         resize();
 
-        let time = 0;
-        let mouseX = cx;
-        let mouseY = cy;
+        // ---------------------------------------------
+        // ACTIVE EFFECTS MANAGER
+        // ---------------------------------------------
+        let activeEffects = [];
 
-        // Make it react slightly to the mouse to feel alive
-        window.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-        });
+        function rotateEffects() {
+            // Pick 3 random unique effects from 0 to 9
+            let newEffects = [];
+            while (newEffects.length < 3) {
+                let r = Math.floor(Math.random() * 10);
+                if (!newEffects.includes(r)) newEffects.push(r);
+            }
+            activeEffects = newEffects;
 
-        function drawKaleidoscope() {
-            // Dark, slightly transparent background to create motion trails
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+            // Apply CSS effects
+            document.body.className = ''; 
+            if (activeEffects.includes(5)) document.body.classList.add('fx-invert');
+            if (activeEffects.includes(6)) document.body.classList.add('fx-hypercolor');
+            if (activeEffects.includes(7)) document.body.classList.add('fx-melt');
+            if (activeEffects.includes(8)) document.body.classList.add('fx-shake');
+            if (activeEffects.includes(9)) document.body.classList.add('fx-scanlines-active');
+
+            console.log("Active Effects:", activeEffects);
+        }
+
+        // Rotate effects every 3.5 seconds for maximum disorientation
+        setInterval(rotateEffects, 3500);
+        rotateEffects(); // Init
+
+
+        // ---------------------------------------------
+        // CANVAS EFFECT RENDERERS (0-4)
+        // ---------------------------------------------
+
+        // Canvas Effect Data
+        let ichorDrops = Array.from({length: 100}).map(() => ({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            speed: Math.random() * 5 + 5,
+            color: ['#FF3333', '#FFCC00', '#3399FF'][Math.floor(Math.random()*3)]
+        }));
+
+        function drawCanvasEffects() {
+            // Base layer with slight fade for motion trails
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
             ctx.fillRect(0, 0, width, height);
 
-            time += 0.02;
+            time += 0.05;
 
-            // Shift origin to center
-            ctx.translate(cx, cy);
+            // Effect 0: Kaleidoscope Swarm
+            if (activeEffects.includes(0)) {
+                ctx.save();
+                ctx.translate(cx, cy);
+                const colors = ['#FF3333', '#FFCC00', '#3399FF'];
+                for (let i = 0; i < 40; i++) {
+                    let radius = i * (Math.sin(time + i * 0.1) * 4 + 6);
+                    let angle = i * 0.2 + time;
+                    let x = Math.cos(angle) * radius;
+                    let y = Math.sin(angle) * radius;
+                    let size = (Math.sin(time * 2 + i) + 2) * 3;
 
-            // We harvested RED, GOLD, and BLUE. Let's make a trippy fractal liquid out of them.
-            const colors = ['#FF3333', '#FFCC00', '#3399FF'];
-
-            for (let i = 0; i < 90; i++) {
-                let radius = i * (Math.sin(time + i * 0.05) * 5 + 8);
-                let angle = i * 0.1 + time + (mouseX / width) * Math.PI;
-                
-                let x = Math.cos(angle) * radius;
-                let y = Math.sin(angle) * radius;
-
-                // Pulsating size
-                let size = (Math.sin(time * 3 + i) + 1.5) * 4;
-
-                ctx.fillStyle = colors[i % 3];
-                ctx.beginPath();
-                
-                // Draw in 4 symmetrical quadrants (Kaleidoscope effect)
-                ctx.arc(x, y, size, 0, Math.PI * 2);
-                ctx.arc(-x, y, size, 0, Math.PI * 2);
-                ctx.arc(x, -y, size, 0, Math.PI * 2);
-                ctx.arc(-x, -y, size, 0, Math.PI * 2);
-                
-                // Add extreme rotational symmetry
-                ctx.arc(y, x, size, 0, Math.PI * 2);
-                ctx.arc(-y, x, size, 0, Math.PI * 2);
-                ctx.arc(y, -x, size, 0, Math.PI * 2);
-                ctx.arc(-y, -x, size, 0, Math.PI * 2);
-
-                ctx.fill();
+                    ctx.fillStyle = colors[i % 3];
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.arc(-x, -y, size, 0, Math.PI * 2);
+                    ctx.arc(y, -x, size, 0, Math.PI * 2);
+                    ctx.arc(-y, x, size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
             }
 
-            // Draw a central "eye" or "core" that warps
-            ctx.fillStyle = `hsl(${(time * 100) % 360}, 100%, 50%)`;
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 20 + Math.sin(time*5)*10, 20 + Math.cos(time*4)*10, time, 0, Math.PI * 2);
-            ctx.fill();
+            // Effect 1: Infinite Zoom Feedback (Draws canvas scaled up onto itself)
+            if (activeEffects.includes(1)) {
+                ctx.save();
+                ctx.globalAlpha = 0.8;
+                ctx.translate(cx, cy);
+                ctx.scale(1.05, 1.05); // Zoom in
+                ctx.rotate(0.01 * Math.sin(time)); // Slight twist
+                ctx.translate(-cx, -cy);
+                ctx.drawImage(canvas, 0, 0);
+                ctx.restore();
+            }
 
-            // Reset transform for next frame
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            // Effect 2: Digital Glitch Slices
+            if (activeEffects.includes(2)) {
+                for (let i = 0; i < 6; i++) {
+                    let y = Math.random() * height;
+                    let sliceH = Math.random() * 40 + 10;
+                    let offset = (Math.random() - 0.5) * 80; // Shift left/right
+                    ctx.drawImage(canvas, 0, y, width, sliceH, offset, y, width, sliceH);
+                }
+            }
 
-            requestAnimationFrame(drawKaleidoscope);
+            // Effect 3: Matrix Ichor Rain
+            if (activeEffects.includes(3)) {
+                ichorDrops.forEach(drop => {
+                    ctx.fillStyle = drop.color;
+                    ctx.fillRect(drop.x, drop.y, 3, 20);
+                    drop.y += drop.speed;
+                    if (drop.y > height) {
+                        drop.y = -20;
+                        drop.x = Math.random() * width;
+                    }
+                });
+            }
+
+            // Effect 4: Geometry Chaos (Connecting Lines)
+            if (activeEffects.includes(4)) {
+                ctx.save();
+                ctx.translate(cx, cy);
+                ctx.lineWidth = 2;
+                for (let i = 0; i < 15; i++) {
+                    ctx.strokeStyle = i % 2 === 0 ? '#FF3333' : '#3399FF';
+                    ctx.beginPath();
+                    let x1 = Math.sin(time + i) * cx;
+                    let y1 = Math.cos(time - i) * cy;
+                    let x2 = Math.cos(time + i*2) * cx;
+                    let y2 = Math.sin(time - i*2) * cy;
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            requestAnimationFrame(drawCanvasEffects);
         }
 
-        drawKaleidoscope();
+        drawCanvasEffects();
 
-        // -----------------------------------------------------
-        // RANDOM CRYPTIC LORE SPAWNER
-        // -----------------------------------------------------
-        const lorePhrases = [
-            "CRYORISED OPAL MELTING",
-            "THE SEEKER IS THE SUIT",
-            "RED: THE BLOOD",
-            "GOLD: THE CONDUIT",
-            "BLUE: THE VOID",
-            "DOOR 3 WELCOMES YOU",
-            "LIQUID METAL NEURAL LINK ACTIVE",
-            "ERROR 0xFE: HUMANITY LOST",
-            "WE ARE THE ICHOR NOW",
-            "FEEL THE RESONANCE"
+
+        // ---------------------------------------------
+        // LORE: RADIO COMMS FROM PAST PILOTS
+        // ---------------------------------------------
+        const radioLines = [
+            "[PILOT_DULE_04]: Cryorised Opal shielding failed... Wait, the Ichor is cooling it? It's entering my veins!",
+            "[SEEKER_MNEME]: The suit isn't armor. It's an egg. I see it now. The metal breathes.",
+            "[PILOT_MIRROR]: Don't look in the puddles! My reflection... it moved before I did!",
+            "[SEEKER_STRONG]: Sector Alpha is lost. The core is self-replicating. Abort! ABORT!",
+            "[UNKNOWN_SIGNAL]: The gold... it sings to the red... We are the Triple Junction.",
+            "[SYSTEM_OVERRIDE]: BIOLOGICAL COMPONENTS REPLACED. EFFICIENCY: 100%.",
+            "[FADED_SEEKER]: I can hear all of you. We are one liquid mind now. Do not fight it.",
+            "[PILOT_WRITTEN]: My logbook is bleeding. The text is rearranging itself into their language."
         ];
 
-        function spawnLore() {
-            const el = document.createElement('div');
-            el.className = 'lore-thought';
-            el.innerText = lorePhrases[Math.floor(Math.random() * lorePhrases.length)];
-            
-            // Random start positions
-            el.style.left = (20 + Math.random() * 60) + 'vw';
-            el.style.top = (20 + Math.random() * 60) + 'vh';
-            
-            // Random vibrant colors
-            const hues = [0, 50, 210]; // Red, Gold, Blue approximate hues
-            el.style.color = `hsl(${hues[Math.floor(Math.random() * hues.length)]}, 100%, 60%)`;
+        let radioBox = document.getElementById('radioText');
+        let currentLine = "";
+        let charIndex = 0;
+        let isTyping = false;
 
-            document.body.appendChild(el);
+        function typeRadioMessage() {
+            if (!isTyping) {
+                // Pick a random line
+                let rawLine = radioLines[Math.floor(Math.random() * radioLines.length)];
+                
+                // Add some chaotic glitch characters randomly to the string
+                currentLine = rawLine.split('').map(c => Math.random() < 0.05 ? '!@#$%&X?'[Math.floor(Math.random()*8)] : c).join('');
+                
+                radioBox.innerHTML = "";
+                charIndex = 0;
+                isTyping = true;
+            }
 
-            // Clean up DOM after animation
-            setTimeout(() => {
-                el.remove();
-            }, 4000);
+            if (isTyping) {
+                radioBox.innerHTML += currentLine.charAt(charIndex);
+                charIndex++;
+
+                if (charIndex < currentLine.length) {
+                    setTimeout(typeRadioMessage, Math.random() * 30 + 10); // Typewriter speed
+                } else {
+                    isTyping = false;
+                    // Wait before next message
+                    setTimeout(typeRadioMessage, 4000);
+                }
+            }
         }
 
-        // Spawn a new weird thought every 600ms
-        setInterval(spawnLore, 600);
+        // Start comms after a slight delay
+        setTimeout(typeRadioMessage, 1000);
+
+
+        // ---------------------------------------------
+        // WAKE UP BUTTON TIMEOUT
+        // ---------------------------------------------
+        setTimeout(() => {
+            document.getElementById('wakeUpBtn').classList.add('visible');
+        }, 10000); // Appears after 10 seconds of torture
 
     </script>
 </body>
