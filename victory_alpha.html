@@ -52,9 +52,16 @@
         .comms-container { flex: 1; background: rgba(15, 0, 0, 0.85); border: 2px solid #FF3333; box-shadow: 0 0 20px rgba(255, 50, 50, 0.2); display: flex; flex-direction: column; }
         .comms-feed { flex-grow: 1; padding: 15px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 10px; }
         .comms-feed::-webkit-scrollbar { display: none; }
+        
         .comms-msg { border-left: 3px solid #FF3333; padding-left: 8px; line-height: 1.3; }
         .comms-alert { border-left: 3px solid #FFFFFF; color: #FFFFFF; background: rgba(255,0,0,0.3); padding: 4px 8px; animation: flashAlert 0.5s infinite alternate; }
         .comms-story { border-left: 3px solid #00FFCC; color: #00FFCC; background: rgba(0,255,200,0.1); padding: 4px 8px; }
+
+        /* Prevents text from squishing and forces the container to scroll instead */
+        .terminal-output > div, .comms-feed > div {
+            flex-shrink: 0;
+            word-wrap: break-word;
+        }
 
         @keyframes flashAlert { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
