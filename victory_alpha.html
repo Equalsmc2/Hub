@@ -58,6 +58,18 @@
 
         @keyframes flashAlert { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
+        /* VISUAL FLAIR: Typing Glitch */
+        @keyframes typingGlitch {
+            0% { transform: translate(0); text-shadow: none; }
+            20% { transform: translate(-2px, 1px); text-shadow: 2px 0 #FF0000, -2px 0 #00FFFF; }
+            40% { transform: translate(2px, -1px); text-shadow: none; }
+            60% { transform: translate(-1px, 2px); color: #FFFFFF; }
+            80% { transform: translate(1px, -2px); text-shadow: -2px 0 #FF0000, 2px 0 #00FFFF; }
+            100% { transform: translate(0); text-shadow: none; }
+        }
+
+        .glitch-input { animation: typingGlitch 0.15s linear; }
+
         #jumpScareOverlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 9999; display: none; justify-content: center; align-items: center; color: #FFFFFF; flex-direction: column; }
         .scare-face { font-size: 15vw; font-weight: bold; color: #FF0000; text-shadow: 0 0 50px #FF0000, 0 0 100px #000; transform: scale(0.5); animation: scareZoom 0.2s forwards ease-in-out; }
 
@@ -166,15 +178,24 @@
         }
 
         // ==========================================
-        // COMMAND CONTROLLER
+        // INPUT VISUALS & COMMAND CONTROLLER
         // ==========================================
+        termInput.addEventListener('input', function() {
+            // 15% chance to glitch the input box on every keystroke
+            if (Math.random() < 0.15) {
+                termInput.classList.add('glitch-input');
+                setTimeout(() => termInput.classList.remove('glitch-input'), 150);
+            }
+        });
+
         termInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 const rawCmd = this.value.trim().toLowerCase();
                 this.value = "";
                 if(!rawCmd || !gameActive) return;
 
-                printLog(`&gt; ${rawCmd}`, '#FFFFFF');
+                // Pass 'true' to trigger the scramble effect for the echo
+                printLog(`> ${rawCmd}`, '#FFFFFF', true); 
                 processCommand(rawCmd);
             }
         });
@@ -183,12 +204,35 @@
             statsDisplay.innerHTML = `SHLD: <span style="color:${shields < 30 ? '#FF0000' : '#FFF'}">${shields}/${maxShields}</span> | NRG: <span style="color:${energy < 25 ? '#FF0000' : '#FFF'}">${energy}%</span> | DATA: <span style="color:#00FFCC">${dataExtracted}%</span> | CRPT: <span style="color:${corruptionLevel > 75 ? '#FF0000' : '#FFF'}">${corruptionLevel}%</span>`;
         }
 
-        function printLog(text, color = '#FF3333') {
+        function printLog(text, color = '#FF3333', scramble = false) {
             const line = document.createElement('div');
-            line.innerHTML = text;
             line.style.color = color;
             termOutput.appendChild(line);
-            termOutput.scrollTop = termOutput.scrollHeight;
+            
+            if (scramble) {
+                // The hacker decrypt effect
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()<>{}[]';
+                let iteration = 0;
+                
+                const interval = setInterval(() => {
+                    line.innerText = text.split('').map((letter, index) => {
+                        if(index < iteration) return text[index];
+                        if(letter === ' ') return ' '; 
+                        return chars[Math.floor(Math.random() * chars.length)];
+                    }).join('');
+                    
+                    termOutput.scrollTop = termOutput.scrollHeight; 
+                    
+                    if(iteration >= text.length){
+                        clearInterval(interval);
+                    }
+                    iteration += 0.5; 
+                }, 15);
+            } else {
+                // Standard instant print
+                line.innerHTML = text;
+                termOutput.scrollTop = termOutput.scrollHeight;
+            }
         }
 
         function pushComms(text, styleType = 'normal') {
@@ -291,7 +335,6 @@
             // Dynamic Anomaly Spawner
             gameLoops.push(setInterval(() => {
                 if (!gameActive || currentAnomaly) return;
-                // Chance scales up based on corruption
                 let chance = 0.3 + (corruptionLevel / 200); 
                 if (Math.random() < chance) triggerAnomaly();
             }, 12000));
