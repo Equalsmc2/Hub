@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE_HUB // SECTOR_VOID_SUB_BETA</title>
+    <title>THE_HUB // SECTOR_VOID_SUB_BETA_MULTILEVEL</title>
     <style>
         * {
             box-sizing: border-box;
@@ -188,15 +188,55 @@
             margin-top: 10px;
             font-size: 14px;
         }
+
+        /* Victory Popup Modal */
+        #victoryModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            display: none;
+        }
+
+        .victory-box {
+            background: #330000;
+            border: 4px solid #00FFCC;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 0 50px rgba(0, 255, 204, 0.5);
+        }
+
+        .victory-link {
+            display: inline-block;
+            background: #00FFCC;
+            color: #330000;
+            padding: 15px 30px;
+            font-weight: bold;
+            text-decoration: none;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        .victory-link:hover {
+            background: #FFFFFF;
+        }
     </style>
 </head>
 <body>
 
-    <!-- LOGIN GATE OVERLAY -->
     <div id="loginGate">
         <div class="portal-box">
             <div style="font-size: 24px; margin-bottom: 15px; color: #FF5555;">:(</div>
-            <div style="font-size: 18px; margin-bottom: 20px; color: #FF5555;">[INITIALIZING SUB_BETA PROTOCOL]</div>
+            <div style="font-size: 18px; margin-bottom: 20px; color: #FF5555;">[INITIALIZING SUB_BETA MULTI-LEVEL]</div>
             <div style="font-size: 14px; margin-bottom: 10px; text-align: left; color: #FF5555;">ENTER AUTHORIZED SEEKER ID:</div>
             <input type="text" id="gateUsername" placeholder="e.g. Mneme_seeker">
             <button onclick="enterPuzzle()">ACCESS LOGIC TERMINAL</button>
@@ -204,9 +244,18 @@
         </div>
     </div>
 
-    <!-- ROOM MAIN INTERFACE -->
+    <div id="victoryModal">
+        <div class="victory-box">
+            <div style="font-size: 28px; color: #00FFCC; margin-bottom: 15px; font-weight: bold;">[ALL 3 LEVELS CLEARED]</div>
+            <div style="font-size: 14px; color: #FFAAAA; margin-bottom: 20px; line-height: 1.5;">
+                The harvester drone successfully bypassed all labyrinth structural walls and harvested the core Ichor sequence. Access sequence terminal below.
+            </div>
+            <a href="victory_beta.html" class="victory-link">PROCEED TO victory_beta.html</a>
+        </div>
+    </div>
+
     <div class="header-panel">
-        <div class="system-title">CHAMBER_STATUS: SUB_BETA [ICHOR HARVESTER LOGIC PUZZLE]</div>
+        <div class="system-title" id="levelTitle">CHAMBER_STATUS: SUB_BETA [LEVEL 1 / 3]</div>
         <div class="user-hud">
             <span>SEEKER: <strong id="hudUser">---</strong></span>
             <span>TRAUMA SUIT: <strong id="hudSuit">---</strong></span>
@@ -220,8 +269,8 @@
             <canvas id="puzzleCanvas" width="400" height="400"></canvas>
         </div>
         <div class="editor-container">
-            <div class="editor-header">PYTHON_EDITOR_v1.0 // HARVESTER_COMMANDS.py</div>
-            <textarea id="pythonCode" spellcheck="false"># Objective: Collect Ichor in sequence: RED -> GOLD -> BLUE
+            <div class="editor-header" id="editorHeader">PYTHON_EDITOR_v1.0 // LEVEL 1: RED -> GOLD -> BLUE</div>
+            <textarea id="pythonCode" spellcheck="false"># Level 1 Directive: Collect RED -> GOLD -> BLUE
 # Available functions: move('UP'), move('DOWN'), move('LEFT'), move('RIGHT'), grab()
 
 move('RIGHT')
@@ -234,11 +283,10 @@ grab()
         </div>
     </div>
 
-    <div style="text-align: center; font-size: 13px; opacity: 0.8;">
-        DIRECTIVE: Write Python syntax to command the Trauma Unit Harvester drone to retrieve Ichor vials in exact color order (Red $\rightarrow$ Gold $\rightarrow$ Blue).
+    <div style="text-align: center; font-size: 13px; opacity: 0.8;" id="directiveText">
+        DIRECTIVE: Write Python syntax to command the Harvester drone through increasing difficulties. Level 3 includes structural walls!
     </div>
 
-    <!-- Firebase SDK & Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -314,7 +362,7 @@ grab()
             document.getElementById('hudColorBox').style.backgroundColor = playerColor;
 
             document.getElementById('loginGate').style.display = 'none';
-            initPuzzleGrid();
+            loadLevel(currentLevel);
         }
 
         window.returnToDoorden = function() {
@@ -323,17 +371,58 @@ grab()
 
         let canvas, ctx;
         const tileSize = 80;
-        let robot = { x: 0, y: 4 }; // 5x5 grid (0 to 4)
+        let currentLevel = 1;
+        let robot = { x: 0, y: 4 };
         let sequenceTarget = ["RED", "GOLD", "BLUE"];
         let collectedSequence = [];
 
-        let items = [
-            { x: 2, y: 2, color: "RED", type: "RED", collected: false },
-            { x: 4, y: 0, color: "GOLD", type: "GOLD", collected: false },
-            { x: 1, y: 1, color: "BLUE", type: "BLUE", collected: false }
-        ];
+        let levels = {
+            1: {
+                start: { x: 0, y: 4 },
+                items: [
+                    { x: 2, y: 2, color: "RED", type: "RED", collected: false },
+                    { x: 4, y: 0, color: "GOLD", type: "GOLD", collected: false },
+                    { x: 1, y: 1, color: "BLUE", type: "BLUE", collected: false }
+                ],
+                walls: []
+            },
+            2: {
+                start: { x: 4, y: 4 },
+                items: [
+                    { x: 0, y: 0, color: "RED", type: "RED", collected: false },
+                    { x: 2, y: 3, color: "GOLD", type: "GOLD", collected: false },
+                    { x: 4, y: 1, color: "BLUE", type: "BLUE", collected: false }
+                ],
+                walls: [
+                    { x: 1, y: 1 }, { x: 1, y: 2 }, { x: 3, y: 3 }
+                ]
+            },
+            3: {
+                start: { x: 0, y: 0 },
+                items: [
+                    { x: 4, y: 4, color: "RED", type: "RED", collected: false },
+                    { x: 0, y: 4, color: "GOLD", type: "GOLD", collected: false },
+                    { x: 4, y: 0, color: "BLUE", type: "BLUE", collected: false }
+                ],
+                walls: [
+                    { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 1, y: 2 },
+                    { x: 3, y: 2 }, { x: 3, y: 3 }, { x: 3, y: 4 },
+                    { x: 2, y: 2 }
+                ]
+            }
+        };
 
-        function initPuzzleGrid() {
+        let currentData = null;
+
+        function loadLevel(lvl) {
+            currentLevel = lvl;
+            currentData = JSON.parse(JSON.stringify(levels[lvl]));
+            robot = { ...currentData.start };
+            collectedSequence = [];
+
+            document.getElementById('levelTitle').textContent = `CHAMBER_STATUS: SUB_BETA [LEVEL ${lvl} / 3]`;
+            document.getElementById('editorHeader').textContent = `PYTHON_EDITOR_v1.0 // LEVEL ${lvl}: SEQUENCE RED -> GOLD -> BLUE`;
+            
             canvas = document.getElementById('puzzleCanvas');
             ctx = canvas.getContext('2d');
             drawGrid();
@@ -358,18 +447,31 @@ grab()
                 ctx.stroke();
             }
 
-            // Draw Ichor Items
-            items.forEach(item => {
-                if (!item.collected) {
-                    ctx.fillStyle = item.color === "RED" ? "#FF3333" : (item.color === "GOLD" ? "#FFCC00" : "#3399FF");
-                    ctx.beginPath();
-                    ctx.arc((item.x * tileSize) + 40, (item.y * tileSize) + 40, 18, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = "#FFFFFF";
+            // Draw Walls
+            if (currentData && currentData.walls) {
+                currentData.walls.forEach(w => {
+                    ctx.fillStyle = "#882222";
+                    ctx.fillRect(w.x * tileSize + 2, w.y * tileSize + 2, tileSize - 4, tileSize - 4);
+                    ctx.strokeStyle = "#FF0000";
                     ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
-            });
+                    ctx.strokeRect(w.x * tileSize + 2, w.y * tileSize + 2, tileSize - 4, tileSize - 4);
+                });
+            }
+
+            // Draw Ichor Items
+            if (currentData && currentData.items) {
+                currentData.items.forEach(item => {
+                    if (!item.collected) {
+                        ctx.fillStyle = item.color === "RED" ? "#FF3333" : (item.color === "GOLD" ? "#FFCC00" : "#3399FF");
+                        ctx.beginPath();
+                        ctx.arc((item.x * tileSize) + 40, (item.y * tileSize) + 40, 18, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.strokeStyle = "#FFFFFF";
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    }
+                });
+            }
 
             // Draw Harvester Robot
             ctx.fillStyle = playerColor;
@@ -388,9 +490,9 @@ grab()
             const code = document.getElementById('pythonCode').value;
             const statusEl = document.getElementById('execStatus');
             
-            // Reset state
-            robot = { x: 0, y: 4 };
-            items.forEach(i => i.collected = false);
+            // Reset position for run
+            robot = { ...currentData.start };
+            currentData.items.forEach(i => i.collected = false);
             collectedSequence = [];
             drawGrid();
 
@@ -398,7 +500,6 @@ grab()
             statusEl.style.color = "#FFCC00";
 
             let lines = code.split('\n');
-            let delay = 0;
 
             for (let line of lines) {
                 line = line.trim();
@@ -406,14 +507,26 @@ grab()
 
                 await new Promise(r => setTimeout(r, 400));
 
+                let nextX = robot.x;
+                let nextY = robot.y;
+
                 if (line.startsWith("move(")) {
                     let dir = line.match(/'([^']+)'/)?.[1];
-                    if (dir === 'UP' && robot.y > 0) robot.y--;
-                    if (dir === 'DOWN' && robot.y < 4) robot.y++;
-                    if (dir === 'LEFT' && robot.x > 0) robot.x--;
-                    if (dir === 'RIGHT' && robot.x < 4) robot.x++;
+                    if (dir === 'UP') nextY--;
+                    if (dir === 'DOWN') nextY++;
+                    if (dir === 'LEFT') nextX--;
+                    if (dir === 'RIGHT') nextX++;
+
+                    // Check bounds & walls
+                    if (nextX >= 0 && nextX < 5 && nextY >= 0 && nextY < 5) {
+                        let hitWall = currentData.walls.some(w => w.x === nextX && w.y === nextY);
+                        if (!hitWall) {
+                            robot.x = nextX;
+                            robot.y = nextY;
+                        }
+                    }
                 } else if (line === "grab()") {
-                    let foundItem = items.find(i => i.x === robot.x && i.y === robot.y && !i.collected);
+                    let foundItem = currentData.items.find(i => i.x === robot.x && i.y === robot.y && !i.collected);
                     if (foundItem) {
                         foundItem.collected = true;
                         collectedSequence.push(foundItem.type);
@@ -429,13 +542,23 @@ grab()
                           collectedSequence[2] === "BLUE";
 
             if (success) {
-                statusEl.textContent = "SUCCESS: SEQUENCE VALIDATED. PROCEEDING...";
-                statusEl.style.color = "#00FFCC";
-                setTimeout(() => {
-                    window.location.href = "door3.html";
-                }, 1500);
+                if (currentLevel < 3) {
+                    statusEl.textContent = `LEVEL ${currentLevel} CLEARED! ADVANCING...`;
+                    statusEl.style.color = "#00FFCC";
+                    setTimeout(() => {
+                        loadLevel(currentLevel + 1);
+                        statusEl.textContent = "STATUS: WAITING FOR EXECUTION";
+                        statusEl.style.color = "#FFAAAA";
+                    }, 1500);
+                } else {
+                    statusEl.textContent = "ALL SECTORS SECURED!";
+                    statusEl.style.color = "#00FFCC";
+                    setTimeout(() => {
+                        document.getElementById('victoryModal').style.display = 'flex';
+                    }, 800);
+                }
             } else {
-                statusEl.textContent = "ERROR: INVALID SEQUENCE OR MISSED TARGETS.";
+                statusEl.textContent = "ERROR: INVALID SEQUENCE, WALL HIT, OR MISSED TARGETS.";
                 statusEl.style.color = "#FF3333";
             }
         }
