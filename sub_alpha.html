@@ -3,159 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE_HUB // ERROR_404_VOID // ECHO_DETECTED</title>
+    <title>THE_HUB // SECTOR_ALPHA_CORRUPTED_HELL</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            user-select: none;
-            overflow: hidden;
         }
 
         body {
-            background-color: #050000;
-            color: #FF3333;
+            background-color: #330000;
+            color: #FF5555;
             font-family: 'Courier New', Courier, monospace;
             height: 100vh;
-            width: 100vw;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
+            padding: 20px 40px;
+            overflow: hidden;
+            user-select: none;
+            transition: background-color 0.1s ease;
+        }
+
+        .header-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px dashed #FF5555;
+            padding-bottom: 10px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+        }
+
+        .system-title {
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px #FF0000;
+            animation: glitchText 0.2s infinite;
+        }
+
+        @keyframes glitchText {
+            0% { transform: translate(0, 0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -1px); }
+            60% { transform: translate(-1px, -2px); }
+            80% { transform: translate(1px, 1px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        .user-hud {
+            font-size: 14px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .color-indicator {
+            width: 15px;
+            height: 15px;
+            display: inline-block;
+            border: 1px solid #FF5555;
+        }
+
+        .canvas-container {
+            flex-grow: 1;
+            display: flex;
             justify-content: center;
             align-items: center;
-            cursor: crosshair;
+            position: relative;
+            margin: 10px 0;
         }
 
-        /* CRT Overlay */
-        .scanlines {
-            position: absolute;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(255, 0, 0, 0.05) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 4px, 3px 100%;
-            z-index: 100;
-            pointer-events: none;
-        }
-
-        /* Fullscreen Canvas for Multiplayer Ghosts & Trails */
         canvas {
-            position: absolute;
+            background-color: #110000;
+            border: 4px solid #FF0000;
+            box-shadow: 0 0 30px #FF0000;
+            cursor: none;
+        }
+
+        .controls-hint {
+            font-size: 13px;
+            text-align: center;
+            background: rgba(255, 0, 0, 0.2);
+            padding: 8px;
+            border: 1px dashed #FF5555;
+            text-shadow: 1px 1px #000;
+        }
+
+        .back-link {
+            color: #FF5555;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .back-link:hover {
+            color: #FFFFFF;
+        }
+
+        #loginGate {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 1;
-        }
-
-        /* The Corrupted 404 Console */
-        .terminal-container {
-            position: relative;
-            z-index: 10;
-            background: rgba(10, 0, 0, 0.85);
-            border: 2px solid #FF0000;
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(255, 0, 0, 0.2);
-            width: 80%;
-            max-width: 800px;
-            height: 60vh;
+            background: #440000;
             display: flex;
             flex-direction: column;
-            padding: 2px;
-            animation: terminalShake 0.1s infinite alternate;
-        }
-
-        @keyframes terminalShake {
-            0% { transform: translate(1px, 0); }
-            100% { transform: translate(-1px, 1px); }
-        }
-
-        .terminal-header {
-            background: #FF0000;
-            color: #000000;
-            padding: 5px 15px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            letter-spacing: 2px;
-        }
-
-        .terminal-body {
-            flex-grow: 1;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
             padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        /* Hide scrollbar */
-        .terminal-body::-webkit-scrollbar { display: none; }
-
-        .error-code {
-            font-size: 72px;
-            font-weight: bold;
-            text-align: center;
-            text-shadow: 4px 4px #000, -2px -2px #FF0055;
-            animation: glitchText 2s infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes glitchText {
-            0%, 100% { transform: skew(0deg); }
-            5%, 15% { transform: skew(10deg); filter: drop-shadow(-5px 0 0 cyan); }
-            10%, 20% { transform: skew(-10deg); filter: drop-shadow(5px 0 0 red); }
-            25%, 95% { transform: skew(0deg); filter: none; }
-        }
-
-        .log-line {
-            font-size: 14px;
-            line-height: 1.2;
-            opacity: 0.8;
-            word-wrap: break-word;
-        }
-
-        .log-highlight { color: #FFFFFF; font-weight: bold; background: #FF0000; padding: 0 5px; }
-
-        .back-btn {
-            background: transparent;
-            color: #FF3333;
-            border: 2px dashed #FF3333;
-            padding: 15px;
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            text-align: center;
-            margin-top: auto;
-            transition: all 0.2s;
-            text-transform: uppercase;
-        }
-
-        .back-btn:hover {
-            background: #FF0000;
-            color: #000000;
-            box-shadow: 0 0 20px #FF0000;
-        }
-
-        /* Login Gate Overlay */
-        #loginGate {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #110000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 1000; padding: 20px;
         }
 
         .portal-box {
             background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #FF0000;
+            border: 3px solid #FF0000;
             padding: 30px;
-            max-width: 500px; width: 100%;
+            max-width: 500px;
+            width: 100%;
             text-align: center;
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.6);
         }
 
         input[type="text"] {
-            background: transparent;
-            border: 1px solid #FF3333;
-            color: #FF3333;
+            background: #110000;
+            border: 2px solid #FF5555;
+            color: #FF5555;
             padding: 10px;
             font-family: 'Courier New', Courier, monospace;
             font-size: 16px;
@@ -164,52 +139,94 @@
             margin-bottom: 15px;
         }
 
-        .login-btn {
-            background: #FF0000; color: #000; border: none; padding: 10px 20px;
-            font-family: 'Courier New', Courier, monospace; font-weight: bold; cursor: pointer;
+        input::placeholder {
+            color: rgba(255, 85, 85, 0.4);
         }
-        .error-text { color: #FFAAAA; margin-top: 10px; font-size: 14px; }
+
+        button {
+            background: #FF0000;
+            color: #FFFFFF;
+            border: 2px solid #FFAAAA;
+            padding: 10px 20px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            text-shadow: 1px 1px #000;
+        }
+
+        button:hover {
+            background: #FFFFFF;
+            color: #550000;
+        }
+
+        .error-text {
+            color: #FFAAAA;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+
+        .chaos-window {
+            position: absolute;
+            background: #550000;
+            border: 3px solid #FF0000;
+            box-shadow: 5px 5px 0px #000;
+            padding: 5px 10px;
+            color: #FFAAAA;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            z-index: 500;
+            pointer-events: none;
+            display: none;
+            text-shadow: 1px 1px #000;
+        }
     </style>
 </head>
 <body>
 
-    <div class="scanlines"></div>
-    <canvas id="voidCanvas"></canvas>
+    <!-- CHAOTIC POPUPS -->
+    <div id="pop1" class="chaos-window" style="top: 15%; left: 10%;">27-36+(66*1)-44</div>
+    <div id="pop2" class="chaos-window" style="top: 70%; left: 75%;">OVER AND OVER AND OVER AND OVER!</div>
+    <div id="pop3" class="chaos-window" style="top: 30%; left: 80%;">ROT ROT ROT</div>
+    <div id="pop4" class="chaos-window" style="top: 65%; left: 15%;">WHY NOT CHEAT? WHY NOT CHEAT? WHY NOT CHEAT?</div>
 
     <!-- LOGIN GATE OVERLAY -->
     <div id="loginGate">
         <div class="portal-box">
-            <div style="font-size: 32px; margin-bottom: 15px; color: #FF0000;">404</div>
-            <div style="font-size: 18px; margin-bottom: 20px;">[SECTOR_ALPHA_GATEWAY_LOST]</div>
-            <div style="font-size: 14px; margin-bottom: 10px; text-align: left;">IDENTIFY SIGNAL TO ENTER THE VOID:</div>
+            <div style="font-size: 28px; margin-bottom: 15px; color: #FF0000; font-weight: bold;">:(&nbsp;&nbsp;:(</div>
+            <div style="font-size: 16px; margin-bottom: 15px; color: #FF5555;">[ICHOR CORRUPTION MATRIX v7.77]</div>
+            <div style="font-size: 13px; margin-bottom: 10px; text-align: left; color: #FFAAAA;">ENTER AUTHORIZED SEEKER ID:</div>
             <input type="text" id="gateUsername" placeholder="e.g. Mneme_seeker">
-            <button class="login-btn" onclick="enterVoid()">BROADCAST SIGNAL</button>
+            <button onclick="enterChaosHell()">SURVIVE THE FINAL PHASE</button>
             <div id="gateError" class="error-text"></div>
         </div>
     </div>
 
-    <!-- MAIN TERMINAL -->
-    <div class="terminal-container" id="terminal" style="display: none;">
-        <div class="terminal-header">
-            <span>KERNEL_PANIC // SECTOR_ALPHA</span>
-            <span id="activeUserDisplay">USER: UNKNOWN</span>
+    <!-- ROOM MAIN INTERFACE -->
+    <div class="header-panel">
+        <div class="system-title">CHAMBER_STATUS: SECTOR_ALPHA // FINAL OVERLOAD PROTOCOL</div>
+        <div class="user-hud">
+            <span>SEEKER: <strong id="hudUser">---</strong></span>
+            <span>TRAUMA SUIT: <strong id="hudSuit">---</strong></span>
+            <span>COLOR CODE: <span class="color-indicator" id="hudColorBox"></span></span>
+            <span class="back-link" onclick="returnToDoor3()">[ABORT]</span>
         </div>
-        <div class="terminal-body" id="logContainer">
-            <div class="error-code">404</div>
-            <div style="text-align: center; margin-bottom: 20px; color: #FFAAAA;">
-                ROUTING INDEX DESTABILIZED. THE ICHOR STREAM HAS DISSOLVED THIS SECTOR.
-            </div>
-            <!-- Logs will spawn here -->
-        </div>
-        <button class="back-btn" onclick="window.location.href='index.html'">ABORT // RETURN TO HUB MAINFRAME</button>
     </div>
 
-    <!-- Firebase SDK & Logic -->
+    <div class="canvas-container">
+        <canvas id="hubCanvas" width="900" height="420"></canvas>
+    </div>
+
+    <div class="controls-hint">
+        DIRECTIVE: Survive <strong>45 seconds</strong>. The final 10 seconds unleash all 6 vectors simultaneously with a pulsing background flash!
+    </div>
+
+    <!-- Firebase SDK & Multiplayer Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBlgsx3uuat9oi2vwntXhInUcAe8N-veLY",
             authDomain: "enter-f1c88.firebaseapp.com",
@@ -230,184 +247,381 @@
             "Prince_seeker"
         ];
 
+        const seekerColors = {
+            "Mneme_seeker": "#ff3366",
+            "Mirror_seeker": "#33ffcc",
+            "Written_seeker": "#ffcc00",
+            "Faded_seeker": "#b8b8b8",
+            "Dule_Seeker": "#ff6600",
+            "Old_seeker": "#9933ff",
+            "Strong_seeker": "#33cc33",
+            "Weaveshaper_seeker": "#3399ff",
+            "Fabled_seeker": "#ff33ff",
+            "Prince_seeker": "#FFFF00"
+        };
+
         let activeUser = "";
-        
-        window.enterVoid = function() {
+        let activeSuit = "Unallocated";
+        let playerColor = "#FF5555";
+
+        window.enterChaosHell = async function() {
             const inputVal = document.getElementById('gateUsername').value.trim();
             const errorDiv = document.getElementById('gateError');
             const matchedUser = validUsers.find(u => u.toLowerCase() === inputVal.toLowerCase());
 
             if (!matchedUser) {
-                errorDiv.textContent = "FATAL: Unrecognized Seeker ID. Cannot establish ghost connection.";
+                errorDiv.textContent = "ERROR 0x80070002: Unknown Seeker ID profile.";
                 return;
             }
 
             activeUser = matchedUser;
-            document.getElementById('activeUserDisplay').textContent = `USER: ${activeUser}`;
-            document.getElementById('loginGate').style.display = 'none';
-            document.getElementById('terminal').style.display = 'flex';
             
-            initMultiplayer();
-            startKernelLogs();
-        }
-
-        // ==========================================
-        // KERNEL PANIC LOG GENERATOR
-        // ==========================================
-        const logLines = [
-            "Attempting to rebuild Alpha architecture... [FAILED]",
-            "Warning: Ichor saturation at 114%. Hull breach imminent.",
-            "Trauma Suit telemetry lost. Searching for biological feedback...",
-            "Orphaned bullet entities detected in memory matrix.",
-            "Sub-routing to Door 3... [CONNECTION TIMEOUT]",
-            "ERROR 0x000000FE: Pointer refers to deleted human memory.",
-            "Purging corrupted Opal data from cache...",
-            "Listening for echoes of past Seekers in the void..."
-        ];
-
-        const logContainer = document.getElementById('logContainer');
-
-        function startKernelLogs() {
-            setInterval(() => {
-                const el = document.createElement('div');
-                el.className = 'log-line';
-                
-                // 10% chance for a severe highlight glitch
-                if (Math.random() < 0.1) {
-                    el.innerHTML = `[CRITICAL] <span class="log-highlight">SYSTEM DELETION AVOIDED</span>`;
-                } else {
-                    el.textContent = `> ${logLines[Math.floor(Math.random() * logLines.length)]} [${Date.now()}]`;
-                }
-
-                logContainer.insertBefore(el, logContainer.children[2]); // Insert below the 404 header
-                
-                // Keep DOM clean
-                if (logContainer.children.length > 15) {
-                    logContainer.removeChild(logContainer.lastChild);
-                }
-            }, 800);
-        }
-
-        // ==========================================
-        // MULTIPLAYER GHOST CANVAS
-        // ==========================================
-        const canvas = document.getElementById('voidCanvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
-
-        function resize() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        let mouseX = width / 2;
-        let mouseY = height / 2;
-        let otherPlayers = {}; 
-        let mouseTrails = [];
-
-        // Track local mouse
-        window.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-
-            // Add to local trail
-            mouseTrails.push({ x: mouseX, y: mouseY, alpha: 1 });
-            if (mouseTrails.length > 20) mouseTrails.shift();
-        });
-
-        // Firebase Sync
-        function initMultiplayer() {
-            // 1. Listen for other players in the void
-            onSnapshot(doc(db, "alpha_void", "ghosts"), (docSnap) => {
+            try {
+                const docSnap = await getDoc(doc(db, "trauma_suits", "allocations"));
                 if (docSnap.exists()) {
-                    otherPlayers = docSnap.data();
+                    const data = docSnap.data();
+                    for (const [suit, user] of Object.entries(data)) {
+                        if (user.toLowerCase() === activeUser.toLowerCase()) {
+                            activeSuit = suit;
+                            break;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Could not fetch suit data", e);
+            }
+
+            playerColor = seekerColors[activeUser] || "#FF5555";
+
+            document.getElementById('hudUser').textContent = activeUser;
+            document.getElementById('hudSuit').textContent = activeSuit;
+            document.getElementById('hudColorBox').style.backgroundColor = playerColor;
+
+            document.getElementById('loginGate').style.display = 'none';
+            
+            setInterval(() => {
+                ['pop1', 'pop2', 'pop3', 'pop4'].forEach(id => {
+                    let el = document.getElementById(id);
+                    el.style.display = 'block';
+                    el.style.top = Math.floor(Math.random() * 80) + '%';
+                    el.style.left = Math.floor(Math.random() * 80) + '%';
+                });
+            }, 800);
+
+            startChaosEngine();
+        }
+
+        window.returnToDoor3 = function() {
+            window.location.href = "door3.html";
+        }
+
+        function startChaosEngine() {
+            const canvas = document.getElementById('hubCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let player = {
+                x: 450,
+                y: 330,
+                radius: 9,
+                speed: 4.5,
+                hp: 100
+            };
+
+            let core = {
+                x: 450,
+                y: 70,
+                radius: 20
+            };
+
+            let bullets = [];
+            let startTime = Date.now();
+            let survivalDuration = 45000; 
+            let trialWon = false;
+            let exitDoor = { x: 410, y: 160, w: 80, h: 90, active: false };
+
+            let currentAttacks = [0, 1];
+            let attackTimer = 0;
+            let attackDuration = 300; 
+            let globalAngle = 0;
+
+            const keys = {};
+
+            window.addEventListener('keydown', (e) => {
+                if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Space", "KeyA", "KeyD", "KeyW", "KeyS"].includes(e.code)) {
+                    e.preventDefault();
+                }
+                keys[e.code] = true;
+
+                if (exitDoor.active && (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space')) {
+                    if (
+                        player.x > exitDoor.x && player.x < exitDoor.x + exitDoor.w &&
+                        player.y > exitDoor.y && player.y < exitDoor.y + exitDoor.h
+                    ) {
+                        window.location.href = "victory_alpha.html";
+                    }
                 }
             });
 
-            // 2. Broadcast local player position (throttled to save writes)
-            setInterval(() => {
-                if (!activeUser) return;
-                
-                // Normalize coordinates so they work across different screen resolutions
-                const normX = mouseX / width;
-                const normY = mouseY / height;
+            window.addEventListener('keyup', (e) => {
+                keys[e.code] = false;
+            });
 
-                setDoc(doc(db, "alpha_void", "ghosts"), {
-                    [activeUser]: {
-                        x: normX,
-                        y: normY,
-                        timestamp: Date.now()
+            let lastSync = 0;
+            async function syncPositionToCloud(force = false) {
+                const now = Date.now();
+                if (force || now - lastSync > 100) {
+                    lastSync = now;
+                    try {
+                        await setDoc(doc(db, "boss_alpha_players", activeUser), {
+                            user: activeUser,
+                            x: player.x,
+                            y: player.y,
+                            color: playerColor,
+                            suit: activeSuit,
+                            hp: player.hp,
+                            lastUpdated: now
+                        }, { merge: true });
+                    } catch (e) {
+                        console.error("Sync error:", e);
                     }
-                }, { merge: true });
-
-            }, 150); // Broadcast every 150ms
-        }
-
-        // Render Loop
-        function drawVoid() {
-            // Clear with slight fade for trailing effects
-            ctx.fillStyle = 'rgba(5, 0, 0, 0.3)';
-            ctx.fillRect(0, 0, width, height);
-
-            // Draw Local Mouse Trail (Digital tear effect)
-            ctx.beginPath();
-            for (let i = 0; i < mouseTrails.length; i++) {
-                const pt = mouseTrails[i];
-                ctx.strokeStyle = `rgba(255, 0, 0, ${pt.alpha})`;
-                ctx.lineWidth = i * 0.5;
-                if (i === 0) ctx.moveTo(pt.x, pt.y);
-                else ctx.lineTo(pt.x, pt.y);
-                
-                // Random glitch spike in the trail
-                if (Math.random() > 0.8) {
-                    ctx.lineTo(pt.x + (Math.random()-0.5)*50, pt.y + (Math.random()-0.5)*50);
                 }
-                
-                pt.alpha -= 0.05;
             }
-            ctx.stroke();
 
-            // Render Multiplayer Ghosts
-            const now = Date.now();
-            for (const [user, data] of Object.entries(otherPlayers)) {
-                if (user === activeUser) continue; // Don't draw self
+            let peers = {};
+            onSnapshot(collection(db, "boss_alpha_players"), (snapshot) => {
+                const now = Date.now();
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    if (data.user !== activeUser && docSnap.id !== activeUser) {
+                        if (now - data.lastUpdated < 4000) {
+                            peers[docSnap.id] = data;
+                        } else {
+                            delete peers[docSnap.id];
+                        }
+                    }
+                });
+            });
 
-                // Only draw players who updated within the last 5 seconds (active)
-                if (now - data.timestamp < 5000) {
-                    // Convert normalized coordinates back to screen space
-                    const drawX = data.x * width;
-                    const drawY = data.y * height;
+            function pickTwoRandomAttacks() {
+                let first = Math.floor(Math.random() * 6);
+                let second = Math.floor(Math.random() * 5);
+                if (second >= first) second++;
+                return [first, second];
+            }
 
-                    // Draw the Ghost Orb
+            function triggerAttack(attackId) {
+                switch(attackId) {
+                    case 0:
+                        if (attackTimer % 6 === 0) {
+                            for (let i = 0; i < 3; i++) {
+                                let angle = globalAngle + (i * ((Math.PI * 2) / 3));
+                                bullets.push({ x: core.x, y: core.y, vx: Math.cos(angle) * 3, vy: Math.sin(angle) * 3, radius: 5 });
+                            }
+                        }
+                        break;
+                    case 1:
+                        if (attackTimer % 40 === 0) {
+                            let angleToPlayer = Math.atan2(player.y - core.y, player.x - core.x);
+                            bullets.push({ x: core.x, y: core.y, vx: Math.cos(angleToPlayer) * 5, vy: Math.sin(angleToPlayer) * 5, radius: 6 });
+                        }
+                        break;
+                    case 2:
+                        if (attackTimer % 12 === 0) {
+                            bullets.push({ x: Math.random() * canvas.width, y: 0, vx: 0, vy: 3.5, radius: 5 });
+                        }
+                        break;
+                    case 3:
+                        if (attackTimer % 25 === 0) {
+                            let sideY = Math.random() * canvas.height;
+                            bullets.push({ x: 0, y: sideY, vx: 4, vy: 0, radius: 5 });
+                            bullets.push({ x: canvas.width, y: sideY, vx: -4, vy: 0, radius: 5 });
+                        }
+                        break;
+                    case 4:
+                        if (attackTimer % 70 === 0) {
+                            let ringCount = 8;
+                            for (let i = 0; i < ringCount; i++) {
+                                let angle = i * ((Math.PI * 2) / ringCount);
+                                bullets.push({ x: core.x, y: core.y, vx: Math.cos(angle) * 2.5, vy: Math.sin(angle) * 2.5, radius: 6 });
+                            }
+                        }
+                        break;
+                    case 5:
+                        if (attackTimer % 15 === 0) {
+                            let randAngle = Math.random() * Math.PI * 2;
+                            bullets.push({ x: core.x, y: core.y, vx: Math.cos(randAngle) * 4, vy: Math.sin(randAngle) * 4, radius: 4 });
+                        }
+                        break;
+                }
+            }
+
+            function update() {
+                let elapsedTime = Date.now() - startTime;
+                let timeRemaining = survivalDuration - elapsedTime;
+
+                if (elapsedTime >= survivalDuration) {
+                    trialWon = true;
+                    exitDoor.active = true;
+                }
+
+                // Gentle eye-friendly red/black flash during the final 10 seconds
+                if (timeRemaining <= 10000 && !trialWon) {
+                    let flashTick = Math.floor(elapsedTime / 300) % 2;
+                    document.body.style.backgroundColor = flashTick === 0 ? "#420000" : "#1a0000";
+                }
+
+                let dx = 0;
+                let dy = 0;
+                if (keys['ArrowLeft'] || keys['KeyA']) dx -= 1;
+                if (keys['ArrowRight'] || keys['KeyD']) dx += 1;
+                if (keys['ArrowUp'] || keys['KeyW']) dy -= 1;
+                if (keys['ArrowDown'] || keys['KeyS']) dy += 1;
+
+                if (dx !== 0 && dy !== 0) {
+                    dx *= 0.7071;
+                    dy *= 0.7071;
+                }
+
+                player.x += dx * player.speed;
+                player.y += dy * player.speed;
+
+                if (player.x < player.radius) player.x = player.radius;
+                if (player.x > canvas.width - player.radius) player.x = canvas.width - player.radius;
+                if (player.y < player.radius) player.y = player.radius;
+                if (player.y > canvas.height - player.radius) player.y = canvas.height - player.radius;
+
+                if (!trialWon) {
+                    globalAngle += 0.05;
+                    attackTimer++;
+
+                    // Final 10 seconds: unleash all 6 attacks simultaneously
+                    if (timeRemaining <= 10000) {
+                        for (let i = 0; i < 6; i++) {
+                            triggerAttack(i);
+                        }
+                    } else {
+                        if (attackTimer >= attackDuration) {
+                            attackTimer = 0;
+                            currentAttacks = pickTwoRandomAttacks();
+                        }
+                        currentAttacks.forEach(attackId => triggerAttack(attackId));
+                    }
+                }
+
+                for (let i = bullets.length - 1; i >= 0; i--) {
+                    let b = bullets[i];
+                    b.x += b.vx;
+                    b.y += b.vy;
+
+                    let dist = Math.hypot(player.x - b.x, player.y - b.y);
+                    if (dist < player.radius + b.radius) {
+                        player.hp -= 15;
+                        bullets.splice(i, 1);
+                        if (player.hp <= 0) {
+                            player.hp = 100;
+                            player.x = 450;
+                            player.y = 330;
+                            startTime = Date.now();
+                        }
+                        continue;
+                    }
+
+                    if (b.x < -10 || b.x > canvas.width + 10 || b.y < -10 || b.y > canvas.height + 10) {
+                        bullets.splice(i, 1);
+                    }
+                }
+
+                syncPositionToCloud();
+            }
+
+            function draw() {
+                ctx.fillStyle = "#110000";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                let remainingSecs = Math.max(0, Math.ceil((survivalDuration - (Date.now() - startTime)) / 1000));
+
+                if (exitDoor.active) {
+                    ctx.fillStyle = "rgba(255, 0, 0, 0.3)";
+                    ctx.fillRect(exitDoor.x, exitDoor.y, exitDoor.w, exitDoor.h);
+                    ctx.strokeStyle = "#FF0000";
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(exitDoor.x, exitDoor.y, exitDoor.w, exitDoor.h);
+
+                    ctx.fillStyle = "#FFAAAA";
+                    ctx.font = "12px 'Courier New'";
+                    ctx.textAlign = "center";
+                    ctx.fillText("ICHOR GATEWAY", exitDoor.x + (exitDoor.w / 2), exitDoor.y - 10);
+                }
+
+                // HUD Bar
+                ctx.fillStyle = "rgba(0,0,0,0.8)";
+                ctx.fillRect(230, 10, 440, 30);
+                ctx.strokeStyle = "#FF0000";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(230, 10, 440, 30);
+
+                let hudText = trialWon ? "VIRAL PROTOCOL PURGED: ENTER GATE" : `SURVIVE ICHOR: ${remainingSecs}s // HP: ${player.hp}`;
+                if (remainingSecs <= 10 && !trialWon) {
+                    hudText = `FINAL RUSH: ${remainingSecs}s // ALL 6 VECTORS // HP: ${player.hp}`;
+                }
+
+                ctx.fillStyle = remainingSecs <= 10 && !trialWon ? "#FFFF00" : (trialWon ? "#FFFFFF" : "#FF5555");
+                ctx.font = "12px 'Courier New'";
+                ctx.textAlign = "center";
+                ctx.fillText(hudText, 450, 29);
+
+                // Viral Glitch Core
+                ctx.fillStyle = "#FF0000";
+                ctx.beginPath();
+                ctx.arc(core.x, core.y, core.radius + (Math.random() * 3), 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = "#FFFFFF";
+                ctx.stroke();
+
+                // Ichor Projectiles
+                ctx.fillStyle = "#FFAAAA";
+                bullets.forEach(b => {
                     ctx.beginPath();
-                    ctx.arc(drawX, drawY, 8 + Math.random() * 4, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(255, 50, 50, ${0.5 + Math.random() * 0.5})`;
+                    ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // Peers
+                for (const [peerName, pData] of Object.entries(peers)) {
+                    ctx.fillStyle = pData.color || "#FF5555";
+                    ctx.beginPath();
+                    ctx.arc(pData.x, pData.y, 8, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // Glitch box around them
-                    if (Math.random() > 0.5) {
-                        ctx.strokeStyle = '#FF0055';
-                        ctx.lineWidth = 1;
-                        ctx.strokeRect(drawX - 15, drawY - 15, 30, 30);
-                    }
-
-                    // Draw Seeker ID Label
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.font = "12px 'Courier New'";
-                    ctx.textAlign = 'center';
-                    // Text flickers occasionally
-                    if (Math.random() > 0.1) {
-                        ctx.fillText(`[ECHO: ${user}]`, drawX, drawY - 20);
-                    }
+                    ctx.fillStyle = "#FF5555";
+                    ctx.font = "10px 'Courier New'";
+                    ctx.textAlign = "center";
+                    ctx.fillText(peerName, pData.x, pData.y - 12);
                 }
+
+                // Local Player
+                ctx.fillStyle = playerColor;
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = "#FFFFFF";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = "#FF5555";
+                ctx.font = "11px 'Courier New'";
+                ctx.textAlign = "center";
+                ctx.fillText(`${activeUser}`, player.x, player.y - 14);
             }
 
-            requestAnimationFrame(drawVoid);
-        }
+            function loop() {
+                update();
+                draw();
+                requestAnimationFrame(loop);
+            }
 
-        drawVoid();
+            loop();
+        }
     </script>
 </body>
 </html>
