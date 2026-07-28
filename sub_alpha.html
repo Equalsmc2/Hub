@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE_HUB // SECTOR_ALPHA_CORRUPTED_HELL</title>
+    <title>THE_HUB // SECTOR_ALPHA_MULTIPHASE_HELL</title>
     <style>
         * {
             box-sizing: border-box;
@@ -172,7 +172,6 @@
             font-size: 13px;
         }
 
-        /* Idiot-style chaotic popups */
         .chaos-window {
             position: absolute;
             background: #550000;
@@ -201,17 +200,17 @@
     <div id="loginGate">
         <div class="portal-box">
             <div style="font-size: 28px; margin-bottom: 15px; color: #FF0000; font-weight: bold;">:(&nbsp;&nbsp;:(</div>
-            <div style="font-size: 16px; margin-bottom: 15px; color: #FF5555;">[ICHOR CORRUPTION MATRIX v4.04]</div>
+            <div style="font-size: 16px; margin-bottom: 15px; color: #FF5555;">[ICHOR CORRUPTION MATRIX v4.04 // MULTI-PHASE]</div>
             <div style="font-size: 13px; margin-bottom: 10px; text-align: left; color: #FFAAAA;">ENTER AUTHORIZED SEEKER ID:</div>
             <input type="text" id="gateUsername" placeholder="e.g. Mneme_seeker">
-            <button onclick="enterChaosHell()">SURVIVE THE VIRAL CORE</button>
+            <button onclick="enterChaosHell()">SURVIVE ALL PHASES</button>
             <div id="gateError" class="error-text"></div>
         </div>
     </div>
 
     <!-- ROOM MAIN INTERFACE -->
     <div class="header-panel">
-        <div class="system-title">CHAMBER_STATUS: SECTOR_ALPHA // VIRAL_CORE_BREACH</div>
+        <div class="system-title">CHAMBER_STATUS: SECTOR_ALPHA // MULTI-PHASE VIRAL BREACH</div>
         <div class="user-hud">
             <span>SEEKER: <strong id="hudUser">---</strong></span>
             <span>TRAUMA SUIT: <strong id="hudSuit">---</strong></span>
@@ -225,7 +224,7 @@
     </div>
 
     <div class="controls-hint">
-        LORE DIRECTIVE: Avoid the bio-regenerative Ichor projectiles and glitched error rings for <strong>45 seconds</strong>. Manifest the gateway upon survival.
+        LORE DIRECTIVE: Survive 3 escalating viral phases against bio-regenerative Ichor corruption. Manifest the gateway upon total completion.
     </div>
 
     <!-- Firebase SDK & Multiplayer Logic -->
@@ -305,7 +304,6 @@
 
             document.getElementById('loginGate').style.display = 'none';
             
-            // Randomly bounce chaos windows around virus-style
             setInterval(() => {
                 ['pop1', 'pop2', 'pop3', 'pop4'].forEach(id => {
                     let el = document.getElementById(id);
@@ -315,14 +313,14 @@
                 });
             }, 800);
 
-            startChaosEngine();
+            startMultiphaseEngine();
         }
 
         window.returnToDoor3 = function() {
             window.location.href = "door3.html";
         }
 
-        function startChaosEngine() {
+        function startMultiphaseEngine() {
             const canvas = document.getElementById('hubCanvas');
             const ctx = canvas.getContext('2d');
 
@@ -343,8 +341,9 @@
             };
 
             let bullets = [];
-            let startTime = Date.now();
-            let survivalDuration = 45000; // Eased to 45 seconds
+            let currentPhase = 1;
+            let phaseStartTime = Date.now();
+            let phaseDuration = 20000; // 20 seconds per phase (3 phases = 60s total)
             let trialWon = false;
             let exitDoor = { x: 410, y: 160, w: 80, h: 90, active: false };
 
@@ -383,6 +382,7 @@
                             color: playerColor,
                             suit: activeSuit,
                             hp: player.hp,
+                            phase: currentPhase,
                             lastUpdated: now
                         }, { merge: true });
                     } catch (e) {
@@ -407,10 +407,16 @@
             });
 
             function update() {
-                let elapsedTime = Date.now() - startTime;
-                if (elapsedTime >= survivalDuration) {
-                    trialWon = true;
-                    exitDoor.active = true;
+                let phaseElapsed = Date.now() - phaseStartTime;
+                if (phaseElapsed >= phaseDuration) {
+                    if (currentPhase < 3) {
+                        currentPhase++;
+                        phaseStartTime = Date.now();
+                        bullets = []; // Clear field on phase transition
+                    } else {
+                        trialWon = true;
+                        exitDoor.active = true;
+                    }
                 }
 
                 let dx = 0;
@@ -434,21 +440,67 @@
                 if (player.y > canvas.height - player.radius) player.y = canvas.height - player.radius;
 
                 if (!trialWon) {
-                    core.angle += 0.06;
                     core.attackTimer++;
 
-                    // Eased slightly: fewer arms and slower bullet velocity for fairness
-                    if (core.attackTimer % 5 === 0) {
-                        let arms = 3;
-                        for (let i = 0; i < arms; i++) {
-                            let bulletAngle = core.angle + (i * ((Math.PI * 2) / arms));
-                            bullets.push({
-                                x: core.x,
-                                y: core.y,
-                                vx: Math.cos(bulletAngle) * 3.5,
-                                vy: Math.sin(bulletAngle) * 3.5,
-                                radius: 5
-                            });
+                    if (currentPhase === 1) {
+                        // Phase 1: Slow steady spiral wave
+                        core.angle += 0.05;
+                        if (core.attackTimer % 6 === 0) {
+                            let arms = 3;
+                            for (let i = 0; i < arms; i++) {
+                                let bulletAngle = core.angle + (i * ((Math.PI * 2) / arms));
+                                bullets.push({
+                                    x: core.x,
+                                    y: core.y,
+                                    vx: Math.cos(bulletAngle) * 3,
+                                    vy: Math.sin(bulletAngle) * 3,
+                                    radius: 5
+                                });
+                            }
+                        }
+                    } else if (currentPhase === 2) {
+                        // Phase 2: Faster dual-spiral with tighter arms
+                        core.angle -= 0.08;
+                        if (core.attackTimer % 4 === 0) {
+                            let arms = 4;
+                            for (let i = 0; i < arms; i++) {
+                                let bulletAngle = core.angle + (i * ((Math.PI * 2) / arms));
+                                bullets.push({
+                                    x: core.x,
+                                    y: core.y,
+                                    vx: Math.cos(bulletAngle) * 4,
+                                    vy: Math.sin(bulletAngle) * 4,
+                                    radius: 5
+                                });
+                            }
+                        }
+                    } else if (currentPhase === 3) {
+                        // Phase 3: Chaotic high-speed storm + sniper direct bursts
+                        core.angle += 0.12;
+                        if (core.attackTimer % 3 === 0) {
+                            let arms = 6;
+                            for (let i = 0; i < arms; i++) {
+                                let bulletAngle = core.angle + (i * ((Math.PI * 2) / arms));
+                                bullets.push({
+                                    x: core.x,
+                                    y: core.y,
+                                    vx: Math.cos(bulletAngle) * 5,
+                                    vy: Math.sin(bulletAngle) * 5,
+                                    radius: 5
+                                });
+                            }
+                        }
+                        if (core.attackTimer % 35 === 0) {
+                            let angleToPlayer = Math.atan2(player.y - core.y, player.x - core.x);
+                            for (let offset = -0.2; offset <= 0.2; offset += 0.2) {
+                                bullets.push({
+                                    x: core.x,
+                                    y: core.y,
+                                    vx: Math.cos(angleToPlayer + offset) * 6.5,
+                                    vy: Math.sin(angleToPlayer + offset) * 6.5,
+                                    radius: 6
+                                });
+                            }
                         }
                     }
                 }
@@ -460,13 +512,15 @@
 
                     let dist = Math.hypot(player.x - b.x, player.y - b.y);
                     if (dist < player.radius + b.radius) {
-                        player.hp -= 15; // Lower damage for a slightly easier challenge
+                        player.hp -= 15;
                         bullets.splice(i, 1);
                         if (player.hp <= 0) {
                             player.hp = 100;
                             player.x = 450;
                             player.y = 330;
-                            startTime = Date.now();
+                            currentPhase = 1; // Reset phase on death
+                            phaseStartTime = Date.now();
+                            bullets = [];
                         }
                         continue;
                     }
@@ -483,7 +537,7 @@
                 ctx.fillStyle = "#110000";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                let remainingSecs = Math.max(0, Math.ceil((survivalDuration - (Date.now() - startTime)) / 1000));
+                let phaseRemainingSecs = Math.max(0, Math.ceil((phaseDuration - (Date.now() - phaseStartTime)) / 1000));
 
                 if (exitDoor.active) {
                     ctx.fillStyle = "rgba(255, 0, 0, 0.3)";
@@ -500,26 +554,26 @@
 
                 // HUD Bar
                 ctx.fillStyle = "rgba(0,0,0,0.8)";
-                ctx.fillRect(250, 10, 400, 30);
+                ctx.fillRect(200, 10, 500, 30);
                 ctx.strokeStyle = "#FF0000";
                 ctx.lineWidth = 2;
-                ctx.strokeRect(250, 10, 400, 30);
+                ctx.strokeRect(200, 10, 500, 30);
 
                 ctx.fillStyle = trialWon ? "#FFFFFF" : "#FF5555";
                 ctx.font = "13px 'Courier New'";
                 ctx.textAlign = "center";
-                ctx.fillText(trialWon ? "VIRAL PROTOCOL PURGED: ENTER GATE" : `SURVIVE ICHOR: ${remainingSecs}s // HP: ${player.hp}`, 450, 29);
+                ctx.fillText(trialWon ? "ALL PHASES PURGED: ENTER GATE" : `PHASE ${currentPhase}/3 [${phaseRemainingSecs}s] // HP: ${player.hp}`, 450, 29);
 
-                // Viral Glitch Core
-                ctx.fillStyle = "#FF0000";
+                // Core rendering based on current phase aesthetic
+                ctx.fillStyle = currentPhase === 3 ? "#FFFFFF" : "#FF0000";
                 ctx.beginPath();
-                ctx.arc(core.x, core.y, core.radius + (Math.random() * 3), 0, Math.PI * 2);
+                ctx.arc(core.x, core.y, core.radius + (Math.random() * (currentPhase * 1.5)), 0, Math.PI * 2);
                 ctx.fill();
-                ctx.strokeStyle = "#FFFFFF";
+                ctx.strokeStyle = "#FF5555";
                 ctx.stroke();
 
                 // Ichor Projectiles
-                ctx.fillStyle = "#FFAAAA";
+                ctx.fillStyle = currentPhase === 3 ? "#FFFF00" : "#FFAAAA";
                 bullets.forEach(b => {
                     ctx.beginPath();
                     ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
@@ -536,7 +590,7 @@
                     ctx.fillStyle = "#FF5555";
                     ctx.font = "10px 'Courier New'";
                     ctx.textAlign = "center";
-                    ctx.fillText(peerName, pData.x, pData.y - 12);
+                    ctx.fillText(`${peerName} [P${pData.phase || 1}]`, pData.x, pData.y - 12);
                 }
 
                 // Local Player
