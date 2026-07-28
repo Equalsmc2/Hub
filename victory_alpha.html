@@ -227,10 +227,12 @@
     <div class="scanlines"></div>
     <canvas id="voidCanvas"></canvas>
 
+    <!-- JUMP SCARE ASSET LAYER -->
     <div id="jumpScareOverlay">
         <div class="scare-face" id="scareFace">Ø_Ø</div>
     </div>
 
+    <!-- ENTRY MATRIX -->
     <div id="loginGate">
         <div class="portal-box">
             <div style="font-size: 36px; margin-bottom: 10px; color: #FF0000; font-weight: bold;">[404_VOID]</div>
@@ -241,12 +243,14 @@
         </div>
     </div>
 
+    <!-- MAIN DASHBOARD -->
     <div class="header-area">
         <div class="error-code">404</div>
         <div style="font-size: 12px; color: #FFAAAA; letter-spacing: 4px;">SECTOR_ALPHA_FABRIC_LIQUEFIED</div>
     </div>
 
     <div class="workspace">
+        <!-- Live Terminal System -->
         <div class="terminal-container">
             <div class="panel-header">
                 <span>SYSTEM_SHELL // COMMAND_PROMPT</span>
@@ -262,6 +266,7 @@
             </div>
         </div>
 
+        <!-- Dynamic Comms Unit -->
         <div class="comms-container">
             <div class="panel-header">>> BROADCAST_INTELLIGENCE</div>
             <div class="comms-feed" id="commsFeed">
@@ -272,6 +277,7 @@
 
     <button class="btn" style="max-width:1400px; margin-top:15px; background:transparent; color:#FF3333; border:1px dashed #FF3333;" onclick="window.location.href='index.html'">ABORT TERMINAL MATRIX</button>
 
+    <!-- Script Architecture -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -387,7 +393,7 @@
                 case 'probe':
                     printLog("Broadcasting wide-band sub-space ping...", '#FF00FF');
                     pushComms(`[ALERT]: Probe array launched by ${activeUser}. Tracking spatial ghosts.`);
-                    triggerRandomEvent(0.8; // High chance to force a trippy encounter
+                    triggerRandomEvent(0.8); // FIXED SYNTAX ERROR HERE
                     break;
                 case 'override_404':
                     printLog("CRITICAL EXCEPTION: Attempting raw root authentication down deep vectors...", '#FF0000');
