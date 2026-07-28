@@ -157,14 +157,14 @@
             <div style="font-size: 18px; margin-bottom: 20px; color: #FF5555;">[INITIALIZING SECTOR_ALPHA PROTOCOL]</div>
             <div style="font-size: 14px; margin-bottom: 10px; text-align: left; color: #FF5555;">ENTER AUTHORIZED SEEKER ID:</div>
             <input type="text" id="gateUsername" placeholder="e.g. Mneme_seeker">
-            <button onclick="enterBossFight()">ENGAGE BOSS</button>
+            <button onclick="enterBossFight()">SURVIVE ONSLAUGHT</button>
             <div id="gateError" class="error-text"></div>
         </div>
     </div>
 
     <!-- ROOM MAIN INTERFACE -->
     <div class="header-panel">
-        <div class="system-title">CHAMBER_STATUS: SECTOR_ALPHA [BOSS ENCOUNTER - CORRUPTED CORE]</div>
+        <div class="system-title">CHAMBER_STATUS: SECTOR_ALPHA [SURVIVAL TRIAL - 60 SECONDS]</div>
         <div class="user-hud">
             <span>SEEKER: <strong id="hudUser">---</strong></span>
             <span>TRAUMA SUIT: <strong id="hudSuit">---</strong></span>
@@ -178,7 +178,7 @@
     </div>
 
     <div class="controls-hint">
-        CONTROLS: Use <strong>A / D</strong> or <strong>LEFT / RIGHT</strong> to move, <strong>W / SPACE / UP</strong> to jump. Dodge corruption projectiles and survive the core onslaught.
+        OBJECTIVE: Survive for <strong>60 seconds</strong> against high-speed corruption waves. Use <strong>A / D</strong> and jump carefully.
     </div>
 
     <!-- Firebase SDK & Multiplayer Logic -->
@@ -257,14 +257,14 @@
             document.getElementById('hudColorBox').style.backgroundColor = playerColor;
 
             document.getElementById('loginGate').style.display = 'none';
-            startBossEngine();
+            startSurvivalEngine();
         }
 
         window.returnToDoor3 = function() {
             window.location.href = "door3.html";
         }
 
-        function startBossEngine() {
+        function startSurvivalEngine() {
             const canvas = document.getElementById('hubCanvas');
             const ctx = canvas.getContext('2d');
 
@@ -275,32 +275,34 @@
                 height: 36,
                 vx: 0,
                 vy: 0,
-                speed: 4,
-                jumpForce: -10,
+                speed: 4.5,
+                jumpForce: -10.5,
                 grounded: false,
                 hp: 100
             };
 
             let boss = {
                 x: 400,
-                y: 100,
-                width: 100,
+                y: 80,
+                width: 120,
                 height: 80,
-                hp: 500,
-                maxHp: 500,
-                vx: 2,
+                vx: 3.5,
                 attackTimer: 0
             };
 
             let projectiles = [];
+            let startTime = Date.now();
+            let survivalDuration = 60000; // 60 seconds
+            let trialWon = false;
 
             const platforms = [
                 { x: 0, y: 410, w: 900, h: 40 },   // Main floor
-                { x: 200, y: 300, w: 140, h: 20 },
-                { x: 560, y: 300, w: 140, h: 20 }
+                { x: 150, y: 310, w: 120, h: 20 },
+                { x: 400, y: 230, w: 100, h: 20 },
+                { x: 630, y: 310, w: 120, h: 20 }
             ];
 
-            const gravity = 0.5;
+            const gravity = 0.55;
             const keys = {};
 
             window.addEventListener('keydown', (e) => {
@@ -351,6 +353,17 @@
             });
 
             function update() {
+                if (trialWon) return;
+
+                let elapsedTime = Date.now() - startTime;
+                if (elapsedTime >= survivalDuration) {
+                    trialWon = true;
+                    setTimeout(() => {
+                        window.location.href = "victory_alpha.html";
+                    }, 2000);
+                    return;
+                }
+
                 // Player movement
                 if (keys['ArrowLeft'] || keys['KeyA']) {
                     player.vx = -player.speed;
@@ -393,24 +406,27 @@
                     player.grounded = true;
                 }
 
-                // Boss AI / Movement
+                // Aggressive Boss Movement
                 boss.x += boss.vx;
-                if (boss.x < 50 || boss.x + boss.width > canvas.width - 50) {
+                if (boss.x < 40 || boss.x + boss.width > canvas.width - 40) {
                     boss.vx *= -1;
                 }
 
-                // Boss Attack patterns
+                // High-frequency barrage attack
                 boss.attackTimer++;
-                if (boss.attackTimer > 60) {
+                if (boss.attackTimer > 20) { // Fires much faster now
                     boss.attackTimer = 0;
-                    projectiles.push({
-                        x: boss.x + (boss.width / 2) - 8,
-                        y: boss.y + boss.height,
-                        vx: (Math.random() - 0.5) * 4,
-                        vy: 4,
-                        w: 16,
-                        h: 16
-                    });
+                    // Burst of 3 projectiles per volley
+                    for (let i = 0; i < 3; i++) {
+                        projectiles.push({
+                            x: boss.x + (boss.width / 2) - 8,
+                            y: boss.y + boss.height,
+                            vx: (Math.random() - 0.5) * 7,
+                            vy: 3 + Math.random() * 3,
+                            w: 14,
+                            h: 14
+                        });
+                    }
                 }
 
                 // Update Projectiles
@@ -419,24 +435,25 @@
                     p.x += p.vx;
                     p.y += p.vy;
 
-                    // Collision with player
+                    // Severe damage on impact (25 HP loss)
                     if (
                         player.x < p.x + p.w &&
                         player.x + player.width > p.x &&
                         player.y < p.y + p.h &&
                         player.y + player.height > p.y
                     ) {
-                        player.hp -= 10;
+                        player.hp -= 25;
                         projectiles.splice(i, 1);
                         if (player.hp <= 0) {
-                            player.hp = 100; // Respawn reset
+                            // Reset trial timer and health on death
+                            player.hp = 100;
                             player.x = 100;
                             player.y = 350;
+                            startTime = Date.now();
                         }
                         continue;
                     }
 
-                    // Remove out of bounds
                     if (p.y > canvas.height || p.x < 0 || p.x > canvas.width) {
                         projectiles.splice(i, 1);
                     }
@@ -449,21 +466,21 @@
                 ctx.fillStyle = "#330000";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                // Draw Boss Health Bar
-                ctx.fillStyle = "rgba(0,0,0,0.5)";
-                ctx.fillRect(250, 20, 400, 20);
-                ctx.fillStyle = "#FF5555";
-                ctx.fillRect(250, 20, (boss.hp / boss.maxHp) * 400, 20);
-                ctx.strokeStyle = "#FFFFFF";
-                ctx.strokeRect(250, 20, 400, 20);
+                let remainingSecs = Math.max(0, Math.ceil((survivalDuration - (Date.now() - startTime)) / 1000));
 
-                ctx.fillStyle = "#FFFFFF";
-                ctx.font = "12px 'Courier New'";
+                // Draw Survival Timer & Health Bar UI
+                ctx.fillStyle = "rgba(0,0,0,0.6)";
+                ctx.fillRect(250, 15, 400, 30);
+                ctx.strokeStyle = "#FF5555";
+                ctx.strokeRect(250, 15, 400, 30);
+
+                ctx.fillStyle = trialWon ? "#00FFCC" : "#FF5555";
+                ctx.font = "14px 'Courier New'";
                 ctx.textAlign = "center";
-                ctx.fillText("CORRUPTED CORE [BOSS]", 450, 35);
+                ctx.fillText(trialWon ? "TRIAL COMPLETE: PROTOCOL UNLOCKED" : `SURVIVE TIME: ${remainingSecs}s // HP: ${player.hp}`, 450, 35);
 
-                // Draw Boss Entity
-                ctx.fillStyle = "#FF3333";
+                // Draw Core Boss Entity
+                ctx.fillStyle = "#FF2222";
                 ctx.fillRect(boss.x, boss.y, boss.width, boss.height);
                 ctx.strokeStyle = "#FFFFFF";
                 ctx.strokeRect(boss.x, boss.y, boss.width, boss.height);
@@ -498,7 +515,7 @@
                 ctx.fillStyle = "#FF5555";
                 ctx.font = "11px 'Courier New'";
                 ctx.textAlign = "center";
-                ctx.fillText(`${activeUser} [HP: ${player.hp}]`, player.x + (player.width / 2), player.y - 8);
+                ctx.fillText(`${activeUser} (YOU)`, player.x + (player.width / 2), player.y - 8);
             }
 
             function loop() {
